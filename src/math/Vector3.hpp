@@ -194,7 +194,7 @@ namespace sim::math
         // Floating-point numbers should almost NEVER be compared with ==.
         // Due to rounding errors, 0.1 + 0.2 != 0.3 in IEEE 754 floating point.
         // Instead, we check if the difference is smaller than some epsilon.
-        [[nodiscard]] constexpr bool aapprox_equal(
+        [[nodiscard]] constexpr bool approx_equal(
             const Vector3& other, 
             T epsilon = static_cast<T>(1e-12)) const noexcept 
         {

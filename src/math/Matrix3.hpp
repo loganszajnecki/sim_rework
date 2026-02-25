@@ -77,7 +77,7 @@ namespace sim::math
                     for (std::size_t k = 0; k < 3; ++k) {
                         sum += (*this)(i, k) * rhs(k, j);
                     }
-                    result(i, j) - sum;
+                    result(i, j) = sum;
                 }
             }
             return result;
