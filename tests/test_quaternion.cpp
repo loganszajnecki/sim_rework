@@ -63,7 +63,7 @@ TEST(Quaternion, NinetyDegreesAboutZMapsXtoY) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  Euler ↔ Quaternion
+//  Euler <-> Quaternion
 // ═══════════════════════════════════════════════════════════════
 
 TEST(Convert, ZeroEulerToIdentityQuat) {
@@ -86,7 +86,7 @@ TEST(Convert, EulerQuatRoundTrip) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  Quaternion DCM ↔ Euler DCM
+//  Quaternion DCM <-> Euler DCM
 // ═══════════════════════════════════════════════════════════════
 
 TEST(Convert, QuatDCMMatchesEulerDCM) {

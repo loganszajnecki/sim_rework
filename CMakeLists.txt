@@ -5,12 +5,10 @@ project(MissileSim
     DESCRIPTION "6-DOF Missile Flight Simulation"
 )
 
-# C++ Standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Compiler Warnings
 add_compile_options(
     -Wall -Wextra -Wpedantic -Wshadow
     -Wnon-virtual-dtor -Wcast-align -Wunused
@@ -18,22 +16,23 @@ add_compile_options(
     -Wnull-dereference -Wdouble-promotion
 )
 
-# Build type defaults
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type" FORCE)
 endif()
 
-# Header-only math/core library (INTERFACE target)
-add_library(sim_core INTERFACE)
-target_include_directories(sim_core INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+# ── Core library ──────────────────────────────────────────────
+# Template/interface headers are header-only (in include/).
+# Concrete model implementations are compiled from src/.
+add_library(sim_core
+    src/models/USStandard1976.cpp
 )
+target_include_directories(sim_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# Main executable
+# ── Main executable ───────────────────────────────────────────
 add_executable(missile_sim src/main.cpp)
 target_link_libraries(missile_sim PRIVATE sim_core)
 
-# Testing
+# ── Testing ───────────────────────────────────────────────────
 option(BUILD_TESTS "Build unit tests" ON)
 if(BUILD_TESTS)
     enable_testing()

@@ -14,12 +14,12 @@ using namespace sim::math;
 using namespace sim::core;
 
 int main() {
-    std::cout << "═══════════════════════════════════════════════\n"
+    std::cout << "===============================================\n"
               << "  6-DOF Missile Simulation — Scaffold Demo\n"
-              << "═══════════════════════════════════════════════\n\n";
+              << "===============================================\n\n";
 
     constexpr double g     = 9.80665;
-    constexpr double dt    = 0.01;
+    constexpr double dt    = 0.005;
     constexpr double V0    = 300.0;
     constexpr double pitch = 45.0 * M_PI / 180.0;
 
@@ -54,7 +54,7 @@ int main() {
     double t = 0.0;
     std::cout << std::fixed << std::setprecision(3);
     std::cout << "  Time(s)   North(m)   Alt(m)   Speed(m/s)   Pitch(°)\n"
-              << "  ─────────────────────────────────────────────────────\n";
+              << "  =====================================================\n";
 
     while (true) {
         double altitude = -state.position.z();

@@ -23,7 +23,7 @@ struct GuidanceCommand {
  * command-to-line-of-sight (CLOS), pursuit guidance, etc.
  *
  * Sits in the signal chain between the seeker and the autopilot:
- *   Seeker → Guidance → Autopilot → Actuator
+ *   Seeker -> Guidance -> Autopilot -> Actuator
  */
 class IGuidance {
 public:

@@ -11,6 +11,7 @@ add_executable(sim_tests
     test_math.cpp
     test_quaternion.cpp
     test_integrator.cpp
+    test_atmosphere.cpp
 )
 
 target_link_libraries(sim_tests PRIVATE
