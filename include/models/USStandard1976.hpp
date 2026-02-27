@@ -35,7 +35,7 @@ namespace sim::models
     private:
         // Physical constants
         static constexpr double kG0          = 9.80665;      // Standard gravity (m/s^2)
-        static constexpr double kR           = 287.05287;    // Specific gas constant, dry air (J/(kg·K))
+        static constexpr double kR           = 287.05287;    // Specific gas constant, dry air (J/(kg*K))
         static constexpr double kGamma       = 1.4;          // Ratio of specific heats
         static constexpr double kEarthRadius = 6356766.0;    // Effective earth radius (m)
 

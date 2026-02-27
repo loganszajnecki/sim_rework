@@ -16,7 +16,7 @@ namespace sim::models
      *   - burn_time:    Duration of burn (s)
      *   - total_mass:   Initial total vehicle mass (kg)
      *   - prop_mass:    Propellant mass (kg), consumed during burn
-     *   - inertia:      Full 3×3 inertia tensor at launch (kg·m^2)
+     *   - inertia:      Full 3×3 inertia tensor at launch (kg*m^2)
      *                    Can be diagonal for simple shapes or full for
      *                    CAD-derived geometry with products of inertia.
      *   - cg_body:      CG location in body frame at launch (m)
@@ -30,7 +30,7 @@ namespace sim::models
             double total_mass{100.0};    // kg
             double prop_mass{30.0};      // kg
 
-            // Full inertia tensor at launch (kg·m^2)
+            // Full inertia tensor at launch (kg*m^2)
             // Default: axisymmetric body (Iyy = Izz), no products of inertia
             sim::math::Mat3d inertia{
                 0.5, 0.0, 0.0,

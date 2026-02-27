@@ -21,7 +21,16 @@ namespace sim::models
     struct MassProperties {
         double mass{0.0};                             // Total vehicle mass (kg)
         sim::math::Vec3d cg_body;                     // CG location in body frame (m)
-        sim::math::Mat3d inertia;                     // Inertia tensor about CG (kg·m²)
+        
+        // Inertia tensor about CG in body frame (kg*m^2).
+        // Uses the standard aerospace sign convention:
+        //   [ Ixx, -Ixy, -Ixz]
+        //   [-Iyx,  Iyy, -Iyz]
+        //   [-Izx, -Izy,  Izz]
+        // Off-diagonal products of inertia carry negative signs.
+        // CAD-derived tensors typically produce this form directly.
+        // For axisymmetric bodies, all off-diagonal terms are zero.
+        sim::math::Mat3d inertia;                     // Inertia tensor about CG (kg*m^2)
     };
 
     /**

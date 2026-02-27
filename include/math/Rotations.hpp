@@ -118,12 +118,6 @@ namespace sim::math {
          *
          * Equivalent to L_ib = inertial_to_body(euler), but computed
          * directly from the quaternion without going through Euler angles.
-         *
-         * Given q = [w, x, y, z]:
-         *
-         *        [ 1-2(y²+z²)    2(xy+wz)    2(xz-wy) ]
-         * L_ib = [ 2(xy-wz)    1-2(x²+z²)    2(yz+wx) ]
-         *        [ 2(xz+wy)      2(yz-wx)  1-2(x²+y²) ]
          */
         template <std::floating_point T>
         [[nodiscard]] Matrix3<T> inertial_to_body(const Quaternion<T>& q) noexcept {

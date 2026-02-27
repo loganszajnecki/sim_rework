@@ -12,6 +12,9 @@ add_executable(sim_tests
     test_quaternion.cpp
     test_integrator.cpp
     test_atmosphere.cpp
+    test_gravity.cpp
+    test_propulsion.cpp
+    test_aero.cpp
 )
 
 target_link_libraries(sim_tests PRIVATE

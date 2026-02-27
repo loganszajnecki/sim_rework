@@ -24,7 +24,11 @@ endif()
 # Template/interface headers are header-only (in include/).
 # Concrete model implementations are compiled from src/.
 add_library(sim_core
+    src/core/EOM.cpp
     src/models/USStandard1976.cpp
+    src/models/FlatEarthGravity.cpp
+    src/models/SolidRocketMotor.cpp
+    src/models/SimpleAero.cpp
 )
 target_include_directories(sim_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
