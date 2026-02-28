@@ -3,9 +3,9 @@
   "cmake.configureOnOpen": true,
   "cmake.generator": "Ninja",
   "C_Cpp.default.cppStandard": "c++20",
-  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "files.associations": {
-    "*.hpp": "cpp"
+      "*.hpp": "cpp"
   },
   "editor.formatOnSave": false
 }
