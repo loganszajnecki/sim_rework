@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simulation>
+
+    <!-- Integrator settings -->
+    <integrator type="rk4" dt="0.001" />
+
+    <!-- Data recording -->
+    <recorder filepath="sim_output.h5" interval="0.01" />
+
+    <!-- Initial conditions -->
+    <initial_conditions>
+        <position north="0" east="0" down="0" />
+        <speed>30.0</speed>
+        <pitch_deg>45.0</pitch_deg>
+        <yaw_deg>0.0</yaw_deg>
+        <roll_deg>0.0</roll_deg>
+    </initial_conditions>
+
+    <!-- Vehicle definition -->
+    <vehicle ref_area="0.05" ref_length="0.2">
+
+        <atmosphere type="us_standard_1976" />
+
+        <gravity type="constant" g="9.80665" />
+
+        <propulsion type="solid_rocket">
+            <thrust>5000.0</thrust>
+            <burn_time>3.0</burn_time>
+            <total_mass>100.0</total_mass>
+            <prop_mass>30.0</prop_mass>
+            <inertia Ixx="0.5" Iyy="10.0" Izz="10.0"
+                     Ixy="0.0" Ixz="0.0" Iyz="0.0" />
+            <cg x="1.0" y="0.0" z="0.0" />
+        </propulsion>
+
+        <aerodynamics type="simple">
+            <!-- Static force coefficients -->
+            <CA>0.3</CA>
+            <CN_alpha>10.0</CN_alpha>
+            <CY_beta>-10.0</CY_beta>
+            <!-- Static moment coefficients -->
+            <Cm_alpha>-3.0</Cm_alpha>
+            <Cn_beta>3.0</Cn_beta>
+            <Cl_delta>-0.5</Cl_delta>
+            <!-- Damping derivatives -->
+            <Cmq>-20.0</Cmq>
+            <Cnr>-20.0</Cnr>
+            <Clp>-5.0</Clp>
+        </aerodynamics>
+
+    </vehicle>
+
+    <!-- Stop conditions -->
+    <stop_conditions>
+        <max_time>300.0</max_time>
+        <min_altitude>0.0</min_altitude>
+    </stop_conditions>
+
+    <!-- Target definitions (uncomment for guided scenarios)
+    <target type="stationary">
+        <position north="5000" east="0" down="-500" />
+    </target>
+
+    <target type="constant_velocity">
+        <position north="10000" east="1000" down="-3000" />
+        <velocity north="-200" east="0" down="0" />
+    </target>
+
+    <target type="maneuvering">
+        <position north="8000" east="500" down="-2000" />
+        <velocity north="-150" east="50" down="0" />
+        <maneuver_g>5.0</maneuver_g>
+        <maneuver_start>10.0</maneuver_start>
+    </target>
+    -->
+
+</simulation>

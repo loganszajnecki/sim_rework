@@ -1,7 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
-#include <functional>
+#include <string>
 
 #include "math/Vector3.hpp"
 #include "math/Rotations.hpp"
@@ -11,16 +11,14 @@
 #include "core/EOM.hpp"
 #include "core/Logger.hpp"
 #include "core/DataRecorder.hpp"
-#include "models/USStandard1976.hpp"
-#include "models/FlatEarthGravity.hpp"
-#include "models/SolidRocketMotor.hpp"
-#include "models/SimpleAero.hpp"
+#include "core/SimConfig.hpp"
+#include "core/ConfigParser.hpp"
+#include "core/VehicleFactory.hpp"
 
 using namespace sim::math;
 using namespace sim::core;
-using namespace sim::models;
 
-/// Compute derived flight quantities from the current state
+/// Derived flight quantities computed each step
 struct FlightData {
     double altitude;
     double speed;
@@ -53,89 +51,75 @@ static FlightData compute_flight_data(const State& state, const Vehicle& vehicle
     return fd;
 }
 
-int main() {
-    // Initialize logger
+static void print_usage(const char* prog) {
+    std::cerr << "Usage:\n"
+              << "  " << prog << " <config.xml>            Run simulation\n"
+              << "  " << prog << " --generate-template     Write default config to default.xml\n";
+}
+
+int main(int argc, char* argv[]) {
+    // Initialize Logger
     Logger::init("missile_sim.log", spdlog::level::info);
+
+    // Parse command line
+    if (argc < 2) {
+        print_usage(argv[0]);
+        return 1;
+    }
+
+    std::string arg = argv[1];
+
+    if (arg == "--generate-template") {
+        ConfigParser::save_template("default.xml");
+        std::cout << "Template configuration written to default.xml\n";
+        return 0;
+    }
+
+    // Load configuration
     SIM_INFO("===============================================");
-    SIM_INFO("  6-DOF Missile Simulation — Powered Flight");
+    SIM_INFO("  6-DOF Missile Simulation");
     SIM_INFO("===============================================");
 
-    // Motor configuration
-    SolidRocketMotor::Config motor_cfg;
-    motor_cfg.thrust     = 5000.0;
-    motor_cfg.burn_time  = 3.0;
-    motor_cfg.total_mass = 100.0;
-    motor_cfg.prop_mass  = 30.0;
-    motor_cfg.inertia    = Mat3d{
-        0.5, 0.0, 0.0,
-        0.0, 10.0, 0.0,
-        0.0, 0.0, 10.0
-    };
-    motor_cfg.cg_body = {1.0, 0.0, 0.0};
+    SimConfig cfg;
+    try {
+        cfg = ConfigParser::load(arg);
+    } catch (const std::exception& e) {
+        SIM_ERROR("Failed to load config: {}", e.what());
+        return 1;
+    }
 
-    // Aero configuration
-    SimpleAero::Coefficients aero_coeffs;
-    aero_coeffs.CA       = 0.3;
-    aero_coeffs.CN_alpha = 10.0;
-    aero_coeffs.CY_beta  = -10.0;
-    aero_coeffs.Cm_alpha = -3.0;
-    aero_coeffs.Cn_beta  = 3.0;
-    aero_coeffs.Cl_delta = -0.5;
-    aero_coeffs.Cmq      = -20.0;
-    aero_coeffs.Cnr      = -20.0;
-    aero_coeffs.Clp      = -5.0;
+    // Build vehicle and initial state from config
+    Vehicle vehicle = VehicleFactory::build_vehicle(cfg.vehicle);
+    State state = VehicleFactory::build_initial_state(cfg);
 
-    // Build the vehicle
-    auto vehicle = Vehicle::Builder()
-        .set_atmosphere(std::make_unique<USStandard1976>())
-        .set_gravity(std::make_unique<FlatEarthGravity>())
-        .set_propulsion(std::make_unique<SolidRocketMotor>(motor_cfg))
-        .set_aerodynamics(std::make_unique<SimpleAero>(aero_coeffs))
-        .set_reference(0.05, 0.2)
-        .build();
-    
-    SIM_INFO("Vehicle built: S_ref={} m^2, d_ref={} m", vehicle.ref_area, vehicle.ref_length);
+    // Set up integrator
+    auto integrator = make_integrator<State, StateDerivative>(cfg.integrator.type);
+    double dt = cfg.integrator.dt;
 
-    // Initial conditions
-    constexpr double launch_angle = 45.0 * M_PI / 180.0;
-    constexpr double rail_speed   = 30.0;
-    constexpr double dt           = 0.001;
-
-    State state;
-    state.position      = Vec3d{0.0, 0.0, 0.0};
-    state.velocity_body  = Vec3d{rail_speed, 0.0, 0.0};
-    state.euler         = EulerAnglesd{0.0, launch_angle, 0.0};
-    state.omega_body    = Vec3d::zero();
-    state.mass          = motor_cfg.total_mass;
-
-    SIM_INFO("IC: pitch={:.1f} deg, speed={:.1f} m/s, mass={:.1f} kg",
-             launch_angle * 180.0 / M_PI, rail_speed, state.mass);
-
-    DataRecorder::Config rec_cfg;
-    rec_cfg.filepath = "sim_output.h5";
-    rec_cfg.record_interval = 0.01;  // 100 Hz
-    DataRecorder recorder(rec_cfg);
-
-    recorder.begin_run(0);
-    recorder.write_attribute("launch_angle_deg", launch_angle * 180.0 / M_PI);
-    recorder.write_attribute("rail_speed_mps", rail_speed);
-    recorder.write_attribute("dt", dt);
-    recorder.write_attribute("motor_thrust_N", motor_cfg.thrust);
-    recorder.write_attribute("motor_burn_time_s", motor_cfg.burn_time);
-
-    // Integrator
-    auto integrator = make_integrator<State, StateDerivative>("rk4");
     auto derivatives = [&vehicle](double t, const State& s) -> StateDerivative {
         return EOM::compute(t, s, vehicle);
     };
 
+    // Set up data recorder
+    DataRecorder::Config rec_cfg;
+    rec_cfg.filepath = cfg.recorder.filepath;
+    rec_cfg.record_interval = cfg.recorder.interval;
+    DataRecorder recorder(rec_cfg);
+
+    recorder.begin_run(0);
+    recorder.write_attribute("config_file", arg);
+    recorder.write_attribute("dt", dt);
+    recorder.write_attribute("launch_pitch_deg", cfg.initial_conditions.pitch_deg);
+    recorder.write_attribute("launch_speed_mps", cfg.initial_conditions.speed);
+
     // ── Console output header ────────────────────────────────
     std::cout << std::fixed << std::setprecision(3);
-    std::cout << "\n  Time(s)   North(m)   Alt(m)   Speed(m/s)   Mach  "
+    std::cout << "\nInitial state:\n" << state << "\n\n";
+    std::cout << "  Time(s)   North(m)   Alt(m)   Speed(m/s)   Mach  "
               << " Pitch(deg)  Mass(kg)\n"
-              << "  ═══════════════════════════════════════════════════"
-              << "═══════════════════\n";
-
+              << "  ==================================================="
+              << "===================\n";
+    
     auto print_row = [&](double t, const State& s, const FlightData& fd) {
         std::cout << "  " << std::setw(7) << t
                   << "  " << std::setw(9) << s.position.x()
@@ -150,7 +134,7 @@ int main() {
     // Simulation loop
     double t = 0.0;
     int step_count = 0;
-    constexpr int print_interval = 1000;
+    int print_interval = static_cast<int>(std::round(1.0 / dt)); // print every ~1 second
     bool motor_burnout_logged = false;
 
     // Record and print initial state
@@ -169,40 +153,43 @@ int main() {
         state = integrator->step(derivatives, t, state, dt);
         t += dt;
         step_count++;
-        
+
         fd = compute_flight_data(state, vehicle);
 
         // Record to HDF5
-        recorder.record(t, state, fd.altitude, fd.alpha, fd.beta, fd.mach, fd.speed, fd.qbar);    
+        recorder.record(t, state, fd.altitude, fd.alpha, fd.beta, fd.mach, fd.speed, fd.qbar);
 
-        // Console output at fixed step interval
+        // Console output
         if (step_count % print_interval == 0) {
             print_row(t, state, fd);
         }
 
         // Impact detection
-        if (t > 0.5 && fd.altitude <= 0.0) {
+        if (t > 0.5 && fd.altitude <= cfg.stop.min_altitude) {
             recorder.record_now(t, state, fd.altitude, fd.alpha, fd.beta,
                                 fd.mach, fd.speed, fd.qbar);
             print_row(t, state, fd);
 
             SIM_INFO("Impact at t={:.3f}s, range={:.1f}m, speed={:.1f} m/s",
                      t, state.position.x(), fd.speed);
-            std::cout << "\n  *** Impact at t = " << t << " s ***\n";
-            std::cout << "  Range: " << state.position.x() << " m\n";
-            std::cout << "  Final speed: " << fd.speed << " m/s\n";
-            std::cout << "  Final mass: " << state.mass << " kg\n";
+            std::cout << "\n  *** Impact at t = " << t << " s ***\n"
+                      << "  Range: " << state.position.x() << " m\n"
+                      << "  Final speed: " << fd.speed << " m/s\n"
+                      << "  Final mass: " << state.mass << " kg\n";
             break;
         }
 
-        if (t > 300.0) {
-            SIM_WARN("Simulation timeout at t=300s");
-            std::cout << "\n  *** Timeout at t = 300 s ***\n";
+        // Timeout
+        if (t > cfg.stop.max_time) {
+            SIM_WARN("Simulation timeout at t={:.1f}s", cfg.stop.max_time);
+            std::cout << "\n  *** Timeout at t = " << t << " s ***\n";
             break;
         }
     }
+
     recorder.end_run();
-    SIM_INFO("Simulation complete. Data written to {}", rec_cfg.filepath);
+    SIM_INFO("Simulation complete. Data written to {}", cfg.recorder.filepath);
+
     std::cout << std::endl;
     return 0;
 }
