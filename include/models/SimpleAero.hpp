@@ -12,19 +12,19 @@ namespace sim::models {
      * tabulated or higher-fidelity aero models are available.
      *
      * Force coefficients (body frame):
-     *   CA  — axial force coefficient (drag along +X)
-     *   CN  — normal force coefficient (per radian of alpha)
-     *   CY  — side force coefficient (per radian of beta)
+     *   CA  - axial force coefficient (drag along +X)
+     *   CN  - normal force coefficient (per radian of alpha)
+     *   CY  - side force coefficient (per radian of beta)
      *
      * Moment coefficients (body frame):
-     *   Cm  — pitching moment coefficient (per radian of alpha)
-     *   Cn  — yawing moment coefficient (per radian of beta)
-     *   Cl  — rolling moment coefficient (per radian of fin deflection)
+     *   Cm  - pitching moment coefficient (per radian of alpha)
+     *   Cn  - yawing moment coefficient (per radian of beta)
+     *   Cl  - rolling moment coefficient (per radian of fin deflection)
      *
      * Damping derivatives (per rad/s, normalized by V/d):
-     *   Cmq — pitch damping
-     *   Cnr — yaw damping
-     *   Clp — roll damping
+     *   Cmq - pitch damping
+     *   Cnr - yaw damping
+     *   Clp - roll damping
      *
      * Forces:  F = q * S_ref * C
      * Moments: M = q * S_ref * d_ref * C

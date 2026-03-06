@@ -3,7 +3,7 @@
 // =============================================================================
 // Standard Library Includes
 // =============================================================================
-// <array>       : std::array — fixed-size container with value semantics.
+// <array>       : std::array - fixed-size container with value semantics.
 //                 Unlike raw C arrays (T arr[3]), std::array knows its size,
 //                 supports iterators, and can be passed by value. It also
 //                 enables "structured bindings" in C++17:
@@ -23,7 +23,7 @@
 // <stdexcept>   : std::runtime_error - used in normalized() when the vector
 //                 is near-zero and normalization would produce garbage.
 //
-// <type_traits> : std::numeric_limits — gives us machine epsilon and other
+// <type_traits> : std::numeric_limits - gives us machine epsilon and other
 //                 properties of floating-point types.
 // =============================================================================
 #include <array>
@@ -76,8 +76,8 @@ namespace sim::math
         --- CONST OVERLOADING ---
         We provide TWO versions of each accessor:
     
-        T  x() const   — returns a COPY of the value. Called on const vectors.
-        T& x()         — returns a REFERENCE to the value. Called on non-const
+        T  x() const   - returns a COPY of the value. Called on const vectors.
+        T& x()         - returns a REFERENCE to the value. Called on non-const
                             vectors. Allows modification: vec.x() = 5.0;
     
         The compiler chooses the correct overload based on whether the Vector3
@@ -105,7 +105,7 @@ namespace sim::math
         array indices and sizes. Using int instead would trigger a
         -Wsign-conversion warning (signed/unsigned mismatch).
         --- data.at(i) vs data[i] ---
-        We use .at(i) which performs BOUNDS CHECKING — it throws
+        We use .at(i) which performs BOUNDS CHECKING - it throws
         std::out_of_range if i >= 3. The alternative data[i] does NO bounds
         checking and causes undefined behavior on out-of-range access.
                 The tradeoff: .at() has a tiny runtime cost (one comparison + branch).
@@ -204,7 +204,7 @@ namespace sim::math
         }
 
         // Static Factory Methods
-        // These are STATIC member functions — they belong to the class itself,
+        // These are STATIC member functions - they belong to the class itself,
         // not to any particular instance. You call them on the type:
         //     Vec3d v = Vec3d::zero();
         //     Vec3d x = Vec3d::unit_x();
@@ -253,7 +253,7 @@ namespace sim::math
     // Type Aliases
     // =============================================================================
     //
-    // "using Vec3d = Vector3<double>;" creates a TYPE ALIAS — a new name for an
+    // "using Vec3d = Vector3<double>;" creates a TYPE ALIAS - a new name for an
     // existing type. After this, Vec3d and Vector3<double> are interchangeable.
     //
     // This is the modern C++11 syntax. The older C++ way is:
@@ -263,7 +263,7 @@ namespace sim::math
     //   2. It works with templates (typedef cannot create template aliases).
     //
     // Aliases reduce verbosity throughout the codebase. Instead of writing
-    // Vector3<double> everywhere, we write Vec3d — shorter and conventional.
+    // Vector3<double> everywhere, we write Vec3d - shorter and conventional.
     // The simulation will almost exclusively use Vec3d (double precision),
     // but Vec3f exists for cases where memory matters more than precision
     // (e.g., visualization data, GPU transfer).

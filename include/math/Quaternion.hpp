@@ -104,7 +104,7 @@ namespace sim::math {
             return {w / s, x / s, y / s, z / s};
         }
 
-        /// Unary negation — represents the same rotation (q and -q are equivalent)
+        /// Unary negation - represents the same rotation (q and -q are equivalent)
         [[nodiscard]] constexpr Quaternion operator-() const noexcept {
             return {-w, -x, -y, -z};
         }

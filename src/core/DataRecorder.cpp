@@ -63,7 +63,7 @@ DataRecorder::DataRecorder(const Config& cfg)
             cfg_.filepath, H5F_ACC_TRUNC);
         SIM_INFO("DataRecorder: created {}", cfg_.filepath);
     } catch (const H5::FileIException& e) {
-        SIM_ERROR("DataRecorder: failed to create {} — {}", cfg_.filepath, e.getCDetailMsg());
+        SIM_ERROR("DataRecorder: failed to create {} - {}", cfg_.filepath, e.getCDetailMsg());
         throw;
     }
 }
@@ -101,7 +101,7 @@ void DataRecorder::begin_run(int run_id) {
         impl_->current_run_id = run_id;
         SIM_INFO("DataRecorder: started {}", name);
     } catch (const H5::GroupIException& e) {
-        SIM_ERROR("DataRecorder: failed to create group {} — {}", name, e.getCDetailMsg());
+        SIM_ERROR("DataRecorder: failed to create group {} - {}", name, e.getCDetailMsg());
         throw;
     }
 }

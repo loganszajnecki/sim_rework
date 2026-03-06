@@ -17,12 +17,12 @@ namespace sim::core
      * via Logger::init(), then use the SIM_* macros throughout the 
      * codebase.
      * Log levels (in order of increasing severity):
-     *   trace    — per-timestep diagnostics, state dumps
-     *   debug    — model entry/exit, intermediate computati\ons
-     *   info     — simulation milestones (burnout, impact, apogee)
-     *   warn     — recoverable issues (clamped values, near-singular matrices)
-     *   error    — serious problems (negative mass, failed convergence)
-     *   critical — unrecoverable state (NaN in state vector)
+     *   trace    - per-timestep diagnostics, state dumps
+     *   debug    - model entry/exit, intermediate computati\ons
+     *   info     - simulation milestones (burnout, impact, apogee)
+     *   warn     - recoverable issues (clamped values, near-singular matrices)
+     *   error    - serious problems (negative mass, failed convergence)
+     *   critical - unrecoverable state (NaN in state vector)
      *  
      * Usage:
      *   Logger::init("sim.log", spdlog::level::info);

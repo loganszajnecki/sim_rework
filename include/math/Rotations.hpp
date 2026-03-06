@@ -62,7 +62,7 @@ namespace sim::math {
         //            [  0      0     1 ]
         // ========================================================
         
-        /// R1(phi) — rotation about the X-axis (Roll)
+        /// R1(phi) - rotation about the X-axis (Roll)
         template <std::floating_point T>
         [[nodiscard]] constexpr Matrix3<T> rotation_x(T angle) noexcept {
             const T c = std::cos(angle);
@@ -74,7 +74,7 @@ namespace sim::math {
             };
         }
 
-        /// R2(theta) — rotation about the Y-axis (Pitch)
+        /// R2(theta) - rotation about the Y-axis (Pitch)
         template <std::floating_point T>
         [[nodiscard]] constexpr Matrix3<T> rotation_y(T angle) noexcept {
             const T c = std::cos(angle);
@@ -86,7 +86,7 @@ namespace sim::math {
             };
         }
 
-        /// R3(psi) — rotation about the Z-axis (Yaw)
+        /// R3(psi) - rotation about the Z-axis (Yaw)
         template <std::floating_point T>
         [[nodiscard]] constexpr Matrix3<T> rotation_z(T angle) noexcept {
             const T c = std::cos(angle);
@@ -202,7 +202,7 @@ namespace sim::math {
          *
          * WARNING: still produces gimbal lock at θ = +/- pi/2, because
          * Euler angles are inherently singular there. The quaternion
-         * itself is fine — only the *extraction* to Euler is problematic.
+         * itself is fine - only the *extraction* to Euler is problematic.
          */
         template <std::floating_point T>
         [[nodiscard]] EulerAngles<T> quaternion_to_euler(const Quaternion<T>& q) noexcept {
@@ -211,7 +211,7 @@ namespace sim::math {
             T cosr_cosp = T{1} - T{2} * (q.x * q.x + q.y * q.y);
             T phi = std::atan2(sinr_cosp, cosr_cosp);
 
-            // Pitch — clamped to avoid NaN from asin
+            // Pitch - clamped to avoid NaN from asin
             T sinp = T{2} * (q.w * q.y - q.z * q.x);
             T theta;
             if (std::abs(sinp) >= T{1}) {

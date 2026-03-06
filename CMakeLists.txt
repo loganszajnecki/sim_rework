@@ -25,7 +25,7 @@ endif()
 
 include(FetchContent)
 
-# spdlog — runtime logging
+# spdlog - runtime logging
 FetchContent_Declare(
     spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
@@ -33,7 +33,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(spdlog)
 
-# pugixml — XML configuration parsing
+# pugixml - XML configuration parsing
 FetchContent_Declare(
     pugixml
     GIT_REPOSITORY https://github.com/zeux/pugixml.git
@@ -41,7 +41,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(pugixml)
 
-# HDF5 — simulation data recording (system install)
+# HDF5 - simulation data recording (system install)
 find_package(HDF5 REQUIRED COMPONENTS CXX)
 
 # ── Core library ──────────────────────────────────────────────
@@ -57,6 +57,8 @@ add_library(sim_core
     src/models/StationaryTarget.cpp
     src/models/ConstantVelocityTarget.cpp
     src/models/ManeuveringTarget.cpp
+    src/models/IdealSeeker.cpp
+    src/models/ProNavGuidance.cpp
 )
 target_include_directories(sim_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
