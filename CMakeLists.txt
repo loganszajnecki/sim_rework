@@ -54,6 +54,9 @@ add_library(sim_core
     src/models/FlatEarthGravity.cpp
     src/models/SolidRocketMotor.cpp
     src/models/SimpleAero.cpp
+    src/models/StationaryTarget.cpp
+    src/models/ConstantVelocityTarget.cpp
+    src/models/ManeuveringTarget.cpp
 )
 target_include_directories(sim_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include

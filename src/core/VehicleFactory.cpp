@@ -5,6 +5,9 @@
 #include "models/FlatEarthGravity.hpp"
 #include "models/SolidRocketMotor.hpp"
 #include "models/SimpleAero.hpp"
+#include "models/StationaryTarget.hpp"
+#include "models/ConstantVelocityTarget.hpp"
+#include "models/ManeuveringTarget.hpp"
 
 #include <stdexcept>
 #include <cmath>
@@ -29,7 +32,7 @@ namespace sim::core {
 
     static std::unique_ptr<IGravity> make_gravity(const GravityConfig& cfg) {
         if (cfg.type == "constant") {
-            SIM_DEBUG("Creating constant gravity: g={} m/s²", cfg.g);
+            SIM_DEBUG("Creating constant gravity: g={} m/s^2", cfg.g);
             return std::make_unique<FlatEarthGravity>(cfg.g);
         }
 
@@ -82,7 +85,7 @@ namespace sim::core {
     // Public API
 
     Vehicle VehicleFactory::build_vehicle(const VehicleConfig& cfg) {
-        SIM_INFO("Building vehicle: S_ref={} m², d_ref={} m", cfg.ref_area, cfg.ref_length);
+        SIM_INFO("Building vehicle: S_ref={} m^2, d_ref={} m", cfg.ref_area, cfg.ref_length);
 
         return Vehicle::Builder()
             .set_atmosphere(make_atmosphere(cfg.atmosphere))
@@ -118,6 +121,45 @@ namespace sim::core {
                 ic.speed, ic.pitch_deg, ic.yaw_deg, state.mass);
 
         return state;
+    }
+
+    // Target Factory
+    static std::unique_ptr<ITarget> make_target(const TargetConfig& cfg) {
+        if (cfg.type == "stationary") {
+            SIM_DEBUG("Creating stationary target at [{}, {}, {}]",
+                      cfg.position.x(), cfg.position.y(), cfg.position.z());
+            return std::make_unique<StationaryTarget>(cfg.position);
+        }
+
+        if (cfg.type == "constant_velocity") {
+            SIM_DEBUG("Creating constant-velocity target at [{},{},{}], vel=[{},{},{}]",
+                       cfg.position.x(), cfg.position.y(), cfg.position.z(),
+                       cfg.velocity.x(), cfg.velocity.y(), cfg.velocity.z());
+            return std::make_unique<ConstantVelocityTarget>(cfg.position, cfg.velocity);
+        }
+        
+        if (cfg.type == "maneuvering") {
+            SIM_DEBUG("Creating maneuvering target: {}g at t={}s",
+                      cfg.maneuver_g, cfg.maneuver_start);
+            return std::make_unique<ManeuveringTarget>(
+                cfg.position, cfg.velocity, cfg.maneuver_g, cfg.maneuver_start);
+        }
+
+        throw std::runtime_error("Unknown target type: " + cfg.type);
+    }
+
+    std::vector<std::unique_ptr<sim::models::ITarget>> 
+    VehicleFactory::build_targets(const std::vector<TargetConfig>& configs) 
+    {
+        std::vector<std::unique_ptr<sim::models::ITarget>> targets;
+        targets.reserve(configs.size());
+
+        for (const auto& cfg : configs) {
+            targets.push_back(make_target(cfg));
+        }
+
+        SIM_INFO("Built {} target(s)", targets.size());
+        return targets;
     }
 
 } // namespace sim::core

@@ -34,6 +34,15 @@ namespace sim::core
          * @return State populated with initial conditions
          */
         [[nodiscard]] static State build_initial_state(const SimConfig& cfg);
+
+        /**
+         * @brief Construct target models from configuration.
+         * @param configs Vector of target configurations from XML
+         * @return Vector of concrete target model instances
+         * @throws std::runtime_error for unknown target types
+         */
+        [[nodiscard]] static std::vector<std::unique_ptr<sim::models::ITarget>>
+            build_targets(const std::vector<TargetConfig>& configs);
     };
 
 } // namespace sim::core

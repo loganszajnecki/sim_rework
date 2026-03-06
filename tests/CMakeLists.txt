@@ -15,6 +15,7 @@ add_executable(sim_tests
     test_gravity.cpp
     test_propulsion.cpp
     test_aero.cpp
+    test_target.cpp
 )
 
 target_link_libraries(sim_tests PRIVATE

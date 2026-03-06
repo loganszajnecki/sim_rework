@@ -199,7 +199,7 @@ namespace sim::core
         cfg.propulsion = parse_propulsion(node.child("propulsion"));
         cfg.aerodynamics = parse_aerodynamics(node.child("aerodynamics"));
 
-        SIM_DEBUG("Config: vehicle S_ref={} m², d_ref={} m", cfg.ref_area, cfg.ref_length);
+        SIM_DEBUG("Config: vehicle S_ref={} m^2, d_ref={} m", cfg.ref_area, cfg.ref_length);
         return cfg;
     }
 

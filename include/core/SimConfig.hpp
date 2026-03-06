@@ -94,7 +94,7 @@ namespace sim::core
 
     // Vehicle
     struct VehicleConfig {
-        double ref_area{0.05};      // Reference area (m²)
+        double ref_area{0.05};      // Reference area (m^2)
         double ref_length{0.2};     // Reference length (m)
 
         AtmosphereConfig atmosphere;
