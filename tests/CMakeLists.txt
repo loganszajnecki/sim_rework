@@ -18,6 +18,8 @@ add_executable(sim_tests
     test_target.cpp
     test_seeker.cpp
     test_guidance.cpp
+    test_autopilot.cpp
+    test_actuator.cpp
 )
 
 target_link_libraries(sim_tests PRIVATE

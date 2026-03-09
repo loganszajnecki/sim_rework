@@ -176,6 +176,8 @@ namespace sim::core
         cfg.Cm_alpha = child_double(node, "Cm_alpha", cfg.Cm_alpha);
         cfg.Cn_beta = child_double(node, "Cn_beta", cfg.Cn_beta);
         cfg.Cl_delta = child_double(node, "Cl_delta", cfg.Cl_delta);
+        cfg.Cm_delta = child_double(node, "Cm_delta", cfg.Cm_delta);
+        cfg.Cn_delta = child_double(node, "Cn_delta", cfg.Cn_delta);
 
         // Damping
         cfg.Cmq = child_double(node, "Cmq", cfg.Cmq);
@@ -184,6 +186,43 @@ namespace sim::core
 
         SIM_DEBUG("Config: aero type={}, CA={}, CN_alpha={}, Cm_alpha={}",
                 cfg.type, cfg.CA, cfg.CN_alpha, cfg.Cm_alpha);
+        return cfg;
+    }
+
+    static SeekerConfig parse_seeker(const pugi::xml_node& node) {
+        SeekerConfig cfg;
+        cfg.type = attr_string(node, "type", cfg.type);
+        cfg.min_range = attr_double(node, "min_range", cfg.min_range);
+        SIM_DEBUG("Config: seeker type={}, min_range={} m", cfg.type, cfg.min_range);
+        return cfg;
+    }
+
+    static GuidanceConfig parse_guidance(const pugi::xml_node& node) {
+        GuidanceConfig cfg;
+        cfg.type = attr_string(node, "type", cfg.type);
+        cfg.nav_ratio = attr_double(node, "nav_ratio", cfg.nav_ratio);
+        SIM_DEBUG("Config: guidance type={}, N={}", cfg.type, cfg.nav_ratio);
+        return cfg;
+    }
+
+    static AutopilotConfig parse_autopilot(const pugi::xml_node& node) {
+        AutopilotConfig cfg;
+        cfg.type = attr_string(node, "type", cfg.type);
+        cfg.Kp = child_double(node, "Kp", cfg.Kp);
+        cfg.Kd = child_double(node, "Kd", cfg.Kd);
+        cfg.Kd_roll = child_double(node, "Kd_roll", cfg.Kd_roll);
+        cfg.max_deflection = child_double(node, "max_deflection", cfg.max_deflection);
+        SIM_DEBUG("Config: autopilot type={}, Kp={}, Kd={}", cfg.type, cfg.Kp, cfg.Kd);
+        return cfg;
+    }
+
+    static ActuatorConfig parse_actuator(const pugi::xml_node& node) {
+        ActuatorConfig cfg;
+        cfg.type = attr_string(node, "type", cfg.type);
+        cfg.time_constant = attr_double(node, "time_constant", cfg.time_constant);
+        cfg.max_deflection = attr_double(node, "max_deflection", cfg.max_deflection);
+        cfg.max_rate = attr_double(node, "max_rate", cfg.max_rate);
+        SIM_DEBUG("Config: actuator type={}, τ={}s", cfg.type, cfg.time_constant);
         return cfg;
     }
 
@@ -199,7 +238,15 @@ namespace sim::core
         cfg.propulsion = parse_propulsion(node.child("propulsion"));
         cfg.aerodynamics = parse_aerodynamics(node.child("aerodynamics"));
 
-        SIM_DEBUG("Config: vehicle S_ref={} m^2, d_ref={} m", cfg.ref_area, cfg.ref_length);
+        // GNC models are optional - only parse if present in XML
+        if (auto n = node.child("seeker"))    cfg.seeker = parse_seeker(n);
+        if (auto n = node.child("guidance"))  cfg.guidance = parse_guidance(n);
+        if (auto n = node.child("autopilot")) cfg.autopilot = parse_autopilot(n);
+        if (auto n = node.child("actuator"))  cfg.actuator = parse_actuator(n);
+
+        SIM_DEBUG("Config: vehicle S_ref={} m^2, d_ref={} m, GNC={}",
+              cfg.ref_area, cfg.ref_length,
+              (cfg.seeker.has_value() ? "enabled" : "disabled"));
         return cfg;
     }
 

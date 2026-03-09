@@ -8,6 +8,10 @@
 #include "models/StationaryTarget.hpp"
 #include "models/ConstantVelocityTarget.hpp"
 #include "models/ManeuveringTarget.hpp"
+#include "models/IdealSeeker.hpp"
+#include "models/ProNavGuidance.hpp"
+#include "models/SimpleAutopilot.hpp"
+#include "models/FirstOrderActuator.hpp"
 
 #include <stdexcept>
 #include <cmath>
@@ -70,6 +74,8 @@ namespace sim::core {
             coeffs.Cm_alpha = cfg.Cm_alpha;
             coeffs.Cn_beta  = cfg.Cn_beta;
             coeffs.Cl_delta = cfg.Cl_delta;
+            coeffs.Cm_delta = cfg.Cm_delta;
+            coeffs.Cn_delta = cfg.Cn_delta;
             coeffs.Cmq      = cfg.Cmq;
             coeffs.Cnr      = cfg.Cnr;
             coeffs.Clp      = cfg.Clp;
@@ -82,18 +88,123 @@ namespace sim::core {
         throw std::runtime_error("Unknown aerodynamics type: " + cfg.type);
     }
 
+    // Target factory
+
+    static std::unique_ptr<ITarget> make_target(const TargetConfig& cfg) {
+        if (cfg.type == "stationary") {
+            SIM_DEBUG("Creating stationary target at [{},{},{}]",
+                    cfg.position.x(), cfg.position.y(), cfg.position.z());
+            return std::make_unique<StationaryTarget>(cfg.position);
+        }
+
+        if (cfg.type == "constant_velocity") {
+            SIM_DEBUG("Creating constant-velocity target at [{},{},{}], vel=[{},{},{}]",
+                    cfg.position.x(), cfg.position.y(), cfg.position.z(),
+                    cfg.velocity.x(), cfg.velocity.y(), cfg.velocity.z());
+            return std::make_unique<ConstantVelocityTarget>(cfg.position, cfg.velocity);
+        }
+
+        if (cfg.type == "maneuvering") {
+            SIM_DEBUG("Creating maneuvering target: {}g at t={}s",
+                    cfg.maneuver_g, cfg.maneuver_start);
+            return std::make_unique<ManeuveringTarget>(
+                cfg.position, cfg.velocity, cfg.maneuver_g, cfg.maneuver_start);
+        }
+
+        throw std::runtime_error("Unknown target type: " + cfg.type);
+    }
+
+    // GNC Factories
+
+    static std::unique_ptr<ISeeker> make_seeker(const SeekerConfig& cfg) {
+        if (cfg.type == "ideal") {
+            SIM_DEBUG("Creating ideal seeker, min_range={} m", cfg.min_range);
+            return std::make_unique<IdealSeeker>(cfg.min_range);
+        }
+        throw std::runtime_error("Unknown seeker type: " + cfg.type);
+    }
+
+    static std::unique_ptr<IGuidance> make_guidance(const GuidanceConfig& cfg) {
+        if (cfg.type == "pro_nav") {
+            SIM_DEBUG("Creating ProNav guidance, N={}", cfg.nav_ratio);
+            return std::make_unique<ProNavGuidance>(cfg.nav_ratio);
+        }
+        throw std::runtime_error("Unknown guidance type: " + cfg.type);
+    }
+
+    static std::unique_ptr<IAutopilot> make_autopilot(const AutopilotConfig& cfg) {
+        if (cfg.type == "simple") {
+            SimpleAutopilot::Gains gains;
+            gains.Kp = cfg.Kp;
+            gains.Kd = cfg.Kd;
+            gains.Kd_roll = cfg.Kd_roll;
+            gains.max_deflection = cfg.max_deflection;
+            SIM_DEBUG("Creating simple autopilot, Kp={}, Kd={}", cfg.Kp, cfg.Kd);
+            return std::make_unique<SimpleAutopilot>(gains);
+        }
+        throw std::runtime_error("Unknown autopilot type: " + cfg.type);
+    }
+
+    static std::unique_ptr<IActuator> make_actuator(const ActuatorConfig& cfg) {
+        if (cfg.type == "first_order") {
+            FirstOrderActuator::Config act_cfg;
+            act_cfg.time_constant = cfg.time_constant;
+            act_cfg.max_deflection = cfg.max_deflection;
+            act_cfg.max_rate = cfg.max_rate;
+            SIM_DEBUG("Creating first-order actuator, tau={}s", cfg.time_constant);
+            return std::make_unique<FirstOrderActuator>(act_cfg);
+        }
+        throw std::runtime_error("Unknown actuator type: " + cfg.type);
+    }
+
     // Public API
 
     Vehicle VehicleFactory::build_vehicle(const VehicleConfig& cfg) {
         SIM_INFO("Building vehicle: S_ref={} m^2, d_ref={} m", cfg.ref_area, cfg.ref_length);
 
-        return Vehicle::Builder()
-            .set_atmosphere(make_atmosphere(cfg.atmosphere))
-            .set_gravity(make_gravity(cfg.gravity))
-            .set_propulsion(make_propulsion(cfg.propulsion))
-            .set_aerodynamics(make_aerodynamics(cfg.aerodynamics))
-            .set_reference(cfg.ref_area, cfg.ref_length)
-            .build();
+        Vehicle::Builder builder;
+        builder.set_atmosphere(make_atmosphere(cfg.atmosphere))
+               .set_gravity(make_gravity(cfg.gravity))
+               .set_propulsion(make_propulsion(cfg.propulsion))
+               .set_aerodynamics(make_aerodynamics(cfg.aerodynamics))
+               .set_reference(cfg.ref_area, cfg.ref_length);
+
+        // Wire GNC models if configured
+        if (cfg.seeker)    builder.set_seeker(make_seeker(*cfg.seeker));
+        if (cfg.guidance)  builder.set_guidance(make_guidance(*cfg.guidance));
+        if (cfg.autopilot) builder.set_autopilot(make_autopilot(*cfg.autopilot));
+        if (cfg.actuator)  builder.set_actuator(make_actuator(*cfg.actuator));
+
+        SIM_INFO("GNC: {}", cfg.seeker.has_value() ? "enabled" : "disabled (unguided)");
+
+        return builder.build();
+    }
+
+    Vehicle VehicleFactory::build_from_config(const SimConfig& cfg) {
+        SIM_INFO("Building vehicle from full config");
+
+        Vehicle::Builder builder;
+        builder.set_atmosphere(make_atmosphere(cfg.vehicle.atmosphere))
+               .set_gravity(make_gravity(cfg.vehicle.gravity))
+               .set_propulsion(make_propulsion(cfg.vehicle.propulsion))
+               .set_aerodynamics(make_aerodynamics(cfg.vehicle.aerodynamics))
+               .set_reference(cfg.vehicle.ref_area, cfg.vehicle.ref_length);
+
+        // Wire GNC models if configured
+        if (cfg.vehicle.seeker)    builder.set_seeker(make_seeker(*cfg.vehicle.seeker));
+        if (cfg.vehicle.guidance)  builder.set_guidance(make_guidance(*cfg.vehicle.guidance));
+        if (cfg.vehicle.autopilot) builder.set_autopilot(make_autopilot(*cfg.vehicle.autopilot));
+        if (cfg.vehicle.actuator)  builder.set_actuator(make_actuator(*cfg.vehicle.actuator));
+
+        // Wire first target if any defined
+        if (!cfg.targets.empty()) {
+            builder.set_target(make_target(cfg.targets.front()));
+            SIM_INFO("Target wired: type={}", cfg.targets.front().type);
+        }
+
+        SIM_INFO("GNC: {}", cfg.vehicle.seeker.has_value() ? "enabled" : "disabled (unguided)");
+
+        return builder.build();
     }
 
     State VehicleFactory::build_initial_state(const SimConfig& cfg) {
@@ -121,31 +232,6 @@ namespace sim::core {
                 ic.speed, ic.pitch_deg, ic.yaw_deg, state.mass);
 
         return state;
-    }
-
-    // Target Factory
-    static std::unique_ptr<ITarget> make_target(const TargetConfig& cfg) {
-        if (cfg.type == "stationary") {
-            SIM_DEBUG("Creating stationary target at [{}, {}, {}]",
-                      cfg.position.x(), cfg.position.y(), cfg.position.z());
-            return std::make_unique<StationaryTarget>(cfg.position);
-        }
-
-        if (cfg.type == "constant_velocity") {
-            SIM_DEBUG("Creating constant-velocity target at [{},{},{}], vel=[{},{},{}]",
-                       cfg.position.x(), cfg.position.y(), cfg.position.z(),
-                       cfg.velocity.x(), cfg.velocity.y(), cfg.velocity.z());
-            return std::make_unique<ConstantVelocityTarget>(cfg.position, cfg.velocity);
-        }
-        
-        if (cfg.type == "maneuvering") {
-            SIM_DEBUG("Creating maneuvering target: {}g at t={}s",
-                      cfg.maneuver_g, cfg.maneuver_start);
-            return std::make_unique<ManeuveringTarget>(
-                cfg.position, cfg.velocity, cfg.maneuver_g, cfg.maneuver_start);
-        }
-
-        throw std::runtime_error("Unknown target type: " + cfg.type);
     }
 
     std::vector<std::unique_ptr<sim::models::ITarget>> 

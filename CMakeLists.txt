@@ -32,6 +32,11 @@ FetchContent_Declare(
     GIT_TAG        v1.14.1
 )
 FetchContent_MakeAvailable(spdlog)
+# Enable debug/trace log macros in debug builds
+target_compile_definitions(spdlog INTERFACE
+    $<$<CONFIG:Debug>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG>
+    $<$<CONFIG:Release>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO>
+)
 
 # pugixml - XML configuration parsing
 FetchContent_Declare(
@@ -59,6 +64,8 @@ add_library(sim_core
     src/models/ManeuveringTarget.cpp
     src/models/IdealSeeker.cpp
     src/models/ProNavGuidance.cpp
+    src/models/SimpleAutopilot.cpp
+    src/models/FirstOrderActuator.cpp
 )
 target_include_directories(sim_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include

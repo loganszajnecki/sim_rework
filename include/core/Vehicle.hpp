@@ -84,6 +84,11 @@ namespace sim::core
             return *actuator_;
         }
 
+        [[nodiscard]] const models::IActuator& actuator() const {
+            if (!actuator_) throw std::runtime_error("Actuator model not set");
+            return *actuator_;
+        }
+
         // ==================================================================== 
         // GNC model access
         // ====================================================================
@@ -108,6 +113,20 @@ namespace sim::core
         [[nodiscard]] const models::ITarget& target() const {
         if (!target_) throw std::runtime_error("Target model not set");
             return *target_;
+        }
+
+        // ==================================================================== 
+        // GNC models and target are optional - unguided flight works without them.
+        // ====================================================================
+        [[nodiscard]] bool has_actuator() const { return actuator_ != nullptr; }
+        [[nodiscard]] bool has_seeker() const { return seeker_ != nullptr; }
+        [[nodiscard]] bool has_guidance() const { return guidance_ != nullptr; }
+        [[nodiscard]] bool has_autopilot() const { return autopilot_ != nullptr; }
+        [[nodiscard]] bool has_target() const { return target_ != nullptr; }
+
+        [[nodiscard]] bool has_gnc() const {
+            return has_seeker() && has_guidance() && has_autopilot()
+                && has_actuator() && has_target();
         }
 
         // ==================================================================== 

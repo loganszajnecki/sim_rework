@@ -3,6 +3,9 @@
 #include "core/Vehicle.hpp"
 #include "core/SimConfig.hpp"
 #include "core/State.hpp"
+#include "models/ITarget.hpp"
+#include <vector>
+#include <memory>
 
 namespace sim::core 
 {
@@ -20,6 +23,14 @@ namespace sim::core
     class VehicleFactory
     {
     public:
+        /**
+         * @brief Construct a fully configured Vehicle from the complete sim config.
+         *
+         * Builds all physics models, and if GNC + target are present,
+         * wires the full guided flight chain. Uses the first target.
+         */
+        [[nodiscard]] static Vehicle build_from_config(const SimConfig& cfg);
+
         /**
          * @brief Construct a Vehicle from the vehicle configuration.
          * @param cfg  Vehicle configuration section

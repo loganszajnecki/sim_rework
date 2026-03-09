@@ -42,6 +42,8 @@ namespace sim::models {
             double Cm_alpha{-3.0};  // Pitch moment slope (per rad, negative = stable)
             double Cn_beta{3.0};    // Yaw moment slope (per rad, positive = stable)
             double Cl_delta{-0.5};  // Roll moment due to fin deflection (per rad)
+            double Cm_delta{-5.0};   // Pitch moment due to pitch fin deflection (per rad)
+            double Cn_delta{5.0};  // Yaw moment due to yaw fin deflection (per rad)
 
             // Damping derivatives (normalized by d / (2V))
             double Cmq{-20.0};     // Pitch damping (negative = damping)

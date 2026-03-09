@@ -85,11 +85,39 @@ namespace sim::core
         double Cm_alpha{-3.0};
         double Cn_beta{3.0};
         double Cl_delta{-0.5};
+        double Cm_delta{-5.0};
+        double Cn_delta{5.0};
 
         // Damping derivatives
         double Cmq{-20.0};
         double Cnr{-20.0};
         double Clp{-5.0};
+    };
+
+    // GNC configurations
+    struct SeekerConfig {
+        std::string type{"ideal"};
+        double min_range{1.0};          // Minimum track range (m)
+    };
+
+    struct GuidanceConfig {
+        std::string type{"pro_nav"};
+        double nav_ratio{4.0};          // Navigation ratio N
+    };
+
+    struct AutopilotConfig {
+        std::string type{"simple"};
+        double Kp{0.001};               // Command gain (rad per m/s^2)
+        double Kd{0.5};                 // Rate damping gain (rad per rad/s)
+        double Kd_roll{0.2};            // Roll damping gain
+        double max_deflection{0.4};     // Max fin deflection (rad)
+    };
+
+    struct ActuatorConfig {
+        std::string type{"first_order"};
+        double time_constant{0.02};     // tau (s)
+        double max_deflection{0.4};     // Position limit (rad)
+        double max_rate{10.0};          // Rate limit (rad/s)
     };
 
     // Vehicle
@@ -101,6 +129,12 @@ namespace sim::core
         GravityConfig gravity;
         PropulsionConfig propulsion;
         AerodynamicsConfig aerodynamics;
+
+        // GNC (optional - omit for unguided flight)
+        std::optional<SeekerConfig> seeker;
+        std::optional<GuidanceConfig> guidance;
+        std::optional<AutopilotConfig> autopilot;
+        std::optional<ActuatorConfig> actuator;
     };
 
     // Threat definition

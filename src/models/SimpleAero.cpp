@@ -41,7 +41,7 @@ namespace sim::models {
         // Since we don't have V, we approximate using omega directly scaled by d_ref.
         // This is valid when coefficients are tuned to this convention.
 
-        // ── Forces (body frame) ──────────────────────────────────
+        // Forces (body frame)
         // Axial: opposes forward motion (acts in -X)
         double FA = -qS * coeffs_.CA;
 
@@ -53,15 +53,20 @@ namespace sim::models {
 
         out.force = {FA, FY, FN};
 
-        // ── Moments (body frame) ─────────────────────────────────
-        // Pitching moment: due to alpha + pitch damping
-        double Cm = coeffs_.Cm_alpha * alpha_rad + coeffs_.Cmq * q * ref_length;
+        // Moments (body frame)
+        // Pitching moment: due to alpha + pitch fin deflection + pitch damping
+        double Cm = coeffs_.Cm_alpha * alpha_rad
+                + coeffs_.Cm_delta * fin_deflections.y()
+                + coeffs_.Cmq * q * ref_length;
 
-        // Yawing moment: due to beta + yaw damping
-        double Cn = coeffs_.Cn_beta * beta_rad + coeffs_.Cnr * r * ref_length;
+        // Yawing moment: due to beta + yaw fin deflection + yaw damping
+        double Cn = coeffs_.Cn_beta * beta_rad
+                + coeffs_.Cn_delta * fin_deflections.z()
+                + coeffs_.Cnr * r * ref_length;
 
-        // Rolling moment: due to fin deflection + roll damping
-        double Cl = coeffs_.Cl_delta * fin_deflections.x() + coeffs_.Clp * p * ref_length;
+        // Rolling moment: due to roll fin deflection + roll damping
+        double Cl = coeffs_.Cl_delta * fin_deflections.x()
+                + coeffs_.Clp * p * ref_length;
 
         out.moment = {qSd * Cl, qSd * Cm, qSd * Cn};
 

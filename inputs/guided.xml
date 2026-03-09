@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simulation>
+
+    <!-- Integrator settings -->
+    <integrator type="rk4" dt="0.001" />
+
+    <!-- Data recording at 100 Hz -->
+    <recorder filepath="guided_output.h5" interval="0.01" />
+
+    <!-- Initial conditions: low-angle launch toward target -->
+    <initial_conditions>
+        <position north="0" east="0" down="0" />
+        <speed>30.0</speed>
+        <pitch_deg>30.0</pitch_deg>
+        <yaw_deg>0.0</yaw_deg>
+        <roll_deg>0.0</roll_deg>
+    </initial_conditions>
+
+    <!-- Vehicle definition with GNC chain -->
+    <vehicle ref_area="0.05" ref_length="0.2">
+
+        <atmosphere type="us_standard_1976" />
+        <gravity type="constant" g="9.80665" />
+
+        <propulsion type="solid_rocket">
+            <thrust>8000.0</thrust>
+            <burn_time>4.0</burn_time>
+            <total_mass>120.0</total_mass>
+            <prop_mass>40.0</prop_mass>
+            <inertia Ixx="0.5" Iyy="12.0" Izz="12.0"
+                     Ixy="0.0" Ixz="0.0" Iyz="0.0" />
+            <cg x="1.2" y="0.0" z="0.0" />
+        </propulsion>
+
+        <aerodynamics type="simple">
+            <CA>0.3</CA>
+            <CN_alpha>10.0</CN_alpha>
+            <CY_beta>-10.0</CY_beta>
+            <Cm_alpha>-3.0</Cm_alpha>
+            <Cn_beta>3.0</Cn_beta>
+            <Cl_delta>-0.5</Cl_delta>
+            <Cm_delta>-5.0</Cm_delta>
+            <Cn_delta>5.0</Cn_delta>
+            <Cmq>-20.0</Cmq>
+            <Cnr>-20.0</Cnr>
+            <Clp>-5.0</Clp>
+        </aerodynamics>
+
+        <!-- GNC chain -->
+        <seeker type="ideal" min_range="1.0" />
+        <guidance type="pro_nav" nav_ratio="4.0" />
+        <autopilot type="simple">
+            <Kp>0.005</Kp>
+            <Kd>0.5</Kd>
+            <Kd_roll>0.2</Kd_roll>
+            <max_deflection>0.4</max_deflection>
+        </autopilot>
+        <actuator type="first_order" time_constant="0.02"
+                  max_deflection="0.4" max_rate="10.0" />
+
+    </vehicle>
+
+    <!-- Stop conditions -->
+    <stop_conditions>
+        <max_time>60.0</max_time>
+        <min_altitude>-10.0</min_altitude>
+    </stop_conditions>
+
+    <!-- Target: incoming from the north at altitude -->
+    <target type="constant_velocity">
+        <position north="5000" east="100" down="-500" />
+        <velocity north="-100" east="0" down="0" />
+    </target>
+
+</simulation>

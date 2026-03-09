@@ -56,8 +56,10 @@ namespace sim::core
         Mat3d inertia = mass_props.inertia;
         
         // 5. Fin deflections
-        // TODO: query IActuator when implemented. 
-        Vec3d fin_deflections = Vec3d::zero();
+        // Read from actuator if present (guided flight), else zero (unguided)
+        Vec3d fin_deflections = vehicle.has_actuator()
+            ? vehicle.actuator().current_deflections()
+            : Vec3d::zero();
 
         // 6. Aerodynamics
         auto aero = vehicle.aerodynamics().compute(
