@@ -64,11 +64,12 @@
     <stop_conditions>
         <max_time>60.0</max_time>
         <min_altitude>-10.0</min_altitude>
+        <poca_range_gate>200.0</poca_range_gate>
     </stop_conditions>
 
     <!-- Target: incoming from the north at altitude -->
     <target type="constant_velocity">
-        <position north="5000" east="100" down="-500" />
+        <position north="5000" east="0" down="-500" />
         <velocity north="-100" east="0" down="0" />
     </target>
 

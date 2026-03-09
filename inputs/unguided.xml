@@ -54,9 +54,10 @@
     <stop_conditions>
         <max_time>300.0</max_time>
         <min_altitude>0.0</min_altitude>
+        <poca_range_gate>200.0</poca_range_gate>
     </stop_conditions>
 
-    <!-- Target definitions -->
+    <!-- Target definitions
     <target type="stationary">
         <position north="5000" east="0" down="-500" />
     </target>
@@ -72,5 +73,6 @@
         <maneuver_g>5.0</maneuver_g>
         <maneuver_start>10.0</maneuver_start>
     </target>
+    -->
 
 </simulation>

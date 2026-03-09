@@ -29,9 +29,9 @@ namespace sim::core {
 
     // Stop conditions
     struct StopConfig {
-        double max_time{300.0};     // Maximum simulation time (s)
-        double min_altitude{0.0};   // Ground impact altitude (m)
-        // Potential TODO: add threat intercept handling config here
+        double max_time{300.0};         // Maximum simulation time (s)
+        double min_altitude{0.0};       // Ground impact altitude (m)
+        double poca_range_gate{200.0};  // POCA detection triggers only below this range (m)
     };
 
     // Initial Conditions

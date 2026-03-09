@@ -55,6 +55,7 @@ add_library(sim_core
     src/core/DataRecorder.cpp
     src/core/ConfigParser.cpp
     src/core/VehicleFactory.cpp
+    src/core/SimRunner.cpp
     src/models/USStandard1976.cpp
     src/models/FlatEarthGravity.cpp
     src/models/SolidRocketMotor.cpp

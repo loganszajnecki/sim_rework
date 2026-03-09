@@ -97,8 +97,10 @@ namespace sim::core {
 
         cfg.max_time = child_double(node, "max_time", cfg.max_time);
         cfg.min_altitude = child_double(node, "min_altitude", cfg.min_altitude);
+        cfg.poca_range_gate = child_double(node, "poca_range_gate", cfg.poca_range_gate);
 
-        SIM_DEBUG("Config: stop max_time={}s, min_alt={}m", cfg.max_time, cfg.min_altitude);
+        SIM_DEBUG("Config: stop max_time={}s, min_alt={}m, poca_gate={}m",
+              cfg.max_time, cfg.min_altitude, cfg.poca_range_gate);
         return cfg;
     }
 
@@ -391,7 +393,8 @@ namespace sim::core {
         auto stop = root.append_child("stop_conditions");
         stop.append_child("max_time").text().set(300.0);
         stop.append_child("min_altitude").text().set(0.0);
-
+        stop.append_child("poca_range_gate").text().set(200.0);
+        
         // Example target (commented guidance for future use)
         auto tgt = root.append_child(pugi::node_comment);
         tgt.set_value(" Target definitions (uncomment and modify as needed)\n"
