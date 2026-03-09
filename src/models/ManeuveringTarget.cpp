@@ -1,8 +1,8 @@
 #include "models/ManeuveringTarget.hpp"
 #include <cmath>
 
-namespace sim::models 
-{
+namespace sim::models {
+    
     ManeuveringTarget::ManeuveringTarget(
         const sim::math::Vec3d& position,
         const sim::math::Vec3d& velocity,

@@ -1,7 +1,6 @@
 #include "models/StationaryTarget.hpp"
 
-namespace sim::models
-{
+namespace sim::models {
     StationaryTarget::StationaryTarget(const sim::math::Vec3d& position)
         : position_(position) {}
 

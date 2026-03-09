@@ -3,8 +3,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace sim::models 
-{
+namespace sim::models {
     AtmosphericState USStandard1976::compute(double altitude_m) const {
         // Clamp to valid range
         altitude_m = std::clamp(altitude_m, -2000.0, 86000.0);

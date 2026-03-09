@@ -5,8 +5,7 @@
 #include "math/Rotations.hpp"
 #include <iostream>
 
-namespace sim::core
-{
+namespace sim::core {
     using namespace sim::math;
     /**
      * @brief Full 6-DOF simulation state (Euler angle formulation).

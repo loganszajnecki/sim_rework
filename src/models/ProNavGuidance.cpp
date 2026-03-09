@@ -1,8 +1,8 @@
 #include "models/ProNavGuidance.hpp"
 #include <cmath>
 
-namespace sim::models 
-{
+namespace sim::models {
+    
     ProNavGuidance::ProNavGuidance(double nav_ratio)
         : nav_ratio_(nav_ratio) {}
 

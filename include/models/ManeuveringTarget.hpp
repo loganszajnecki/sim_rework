@@ -2,8 +2,7 @@
 
 #include "models/ITarget.hpp"
 
-namespace sim::models 
-{
+namespace sim::models {
     /**
      * @brief Target that flies straight, then executes a constant g-maneuver.
      * 

@@ -3,7 +3,6 @@
 #include "models/IAerodynamics.hpp"
 
 namespace sim::models {
-
     /**
      * @brief Simple constant-coefficient aerodynamics model.
      *

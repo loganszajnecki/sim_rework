@@ -4,8 +4,7 @@
 #include "math/Matrix3.hpp"
 #include <memory>
 
-namespace sim::models
-{
+namespace sim::models {
     /**
      * @brief Propulsion output at a given time.
      */

@@ -2,8 +2,8 @@
 #include <cmath>
 #include <algorithm>
 
-namespace sim::models 
-{
+namespace sim::models {
+    
     using namespace sim::math;
 
     IdealSeeker::IdealSeeker(double min_range)

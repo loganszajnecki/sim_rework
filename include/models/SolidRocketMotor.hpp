@@ -2,8 +2,7 @@
 
 #include "models/IPropulsion.hpp"
 
-namespace sim::models
-{
+namespace sim::models {
     /**
      * @brief Simple solid rocket motor model.
      *

@@ -1,7 +1,6 @@
 #include "models/ConstantVelocityTarget.hpp"
 
-namespace sim::models 
-{
+namespace sim::models {
     ConstantVelocityTarget::ConstantVelocityTarget(
         const sim::math::Vec3d& position,
         const sim::math::Vec3d& velocity)

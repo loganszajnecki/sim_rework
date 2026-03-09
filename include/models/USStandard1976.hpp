@@ -4,8 +4,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace sim::models
-{
+namespace sim::models {
     /**
      * @brief US Standard Atmosphere 1976 Implementation
      * 

@@ -1,7 +1,6 @@
 #include "models/FlatEarthGravity.hpp"
 
-namespace sim::models
-{
+namespace sim::models {
     FlatEarthGravity::FlatEarthGravity(double g)
         : g_(g) {}
     

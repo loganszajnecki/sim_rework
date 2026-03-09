@@ -2,8 +2,7 @@
 
 #include "models/ITarget.hpp"
 
-namespace sim::models
-{
+namespace sim::models {
     /**
      * @brief Stationary (non-moving) target.
      * 

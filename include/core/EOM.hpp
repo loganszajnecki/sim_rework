@@ -3,8 +3,7 @@
 #include "core/State.hpp"
 #include "core/Vehicle.hpp"
 
-namespace sim::core
-{
+namespace sim::core {
     /**
      * @brief 6-DOF Equations of Motion.
      * 

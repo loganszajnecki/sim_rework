@@ -2,7 +2,7 @@
 #include <cmath>
 
 namespace sim::models {
-
+    
     SimpleAero::SimpleAero() : coeffs_{} {}
 
     SimpleAero::SimpleAero(const Coefficients& coeffs) : coeffs_(coeffs) {}

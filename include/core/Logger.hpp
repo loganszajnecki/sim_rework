@@ -7,8 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace sim::core
-{
+namespace sim::core {
     /**
      * @brief Centralized simulation logger.
      * 

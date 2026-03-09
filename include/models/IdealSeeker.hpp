@@ -2,8 +2,7 @@
 
 #include "models/ISeeker.hpp"
 
-namespace sim::models 
-{
+namespace sim::models {
     /**
      * @brief Ideal (truth) seeker model.
      *

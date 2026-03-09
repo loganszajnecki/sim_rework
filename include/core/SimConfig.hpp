@@ -6,8 +6,7 @@
 #include <vector>
 #include <optional>
 
-namespace sim::core
-{
+namespace sim::core {
     /**
      * @brief Complete simulation configuration, populated from XML.
      * 

@@ -6,8 +6,7 @@
 #include <concepts>
 #include <iostream>
 
-namespace sim::math 
-{
+namespace sim::math {
     /** 
      * @brief 3x3 matrix, stored row-major.
      * Primary uses: Direction Cosine Matrices (DCMs) for frame rotations,

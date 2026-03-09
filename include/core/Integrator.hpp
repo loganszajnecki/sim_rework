@@ -6,8 +6,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace sim::core
-{
+namespace sim::core {
     // ============================================================
     // Concept: Integrable
     // ============================================================

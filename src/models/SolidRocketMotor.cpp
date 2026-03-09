@@ -1,8 +1,7 @@
 #include "models/SolidRocketMotor.hpp"
 #include <algorithm>
 
-namespace sim::models
-{
+namespace sim::models {
     SolidRocketMotor::SolidRocketMotor(const Config& cfg)
         : cfg_(cfg), mass_flow_rate_(cfg.prop_mass/cfg.burn_time) {}
 

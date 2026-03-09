@@ -2,8 +2,7 @@
 
 #include <memory>
 
-namespace sim::models
-{
+namespace sim::models {
     /**
      * @brief Atmospheric properties at a given altitude
      * 

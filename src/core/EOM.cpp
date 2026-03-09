@@ -3,8 +3,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace sim::core
-{
+namespace sim::core {
     using namespace sim::math;
 
     StateDerivative EOM::compute(

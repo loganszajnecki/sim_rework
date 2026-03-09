@@ -2,8 +2,7 @@
 
 #include "models/IAutopilot.hpp"
 
-namespace sim::models 
-{
+namespace sim::models {
     /**
      * @brief Simple proportional autopilot with rate damping. 
      * 

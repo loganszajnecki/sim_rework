@@ -2,8 +2,7 @@
 
 #include "models/IActuator.hpp"
 
-namespace sim::models 
-{
+namespace sim::models {
     /**
      * @brief First-order lag actuator with rate and position limits.
      *

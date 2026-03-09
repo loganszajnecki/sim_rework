@@ -13,8 +13,7 @@ namespace H5 {
     class Group;
 }
 
-namespace sim::core
-{
+namespace sim::core {
     /**
      * @brief HDF5 simulation data recorder.
      *

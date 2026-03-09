@@ -3,8 +3,7 @@
 #include "math/Vector3.hpp"
 #include <memory>
 
-namespace sim::models
-{
+namespace sim::models {
     /**
      * Aerodynamic forces and moments in the body frame
      */

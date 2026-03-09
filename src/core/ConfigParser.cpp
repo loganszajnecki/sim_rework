@@ -5,8 +5,7 @@
 #include <stdexcept>
 #include <cmath>
 
-namespace sim::core 
-{
+namespace sim::core {
     // Helpers: read an attribute with a default value
     static double attr_double(const pugi::xml_node& node, const char* name, double def) {
         auto attr = node.attribute(name);

@@ -7,8 +7,7 @@
 #include <vector>
 #include <memory>
 
-namespace sim::core 
-{
+namespace sim::core {
     /**
      * @brief Factory for constructing a Vehicle and initial State from configuration.
      *

@@ -2,8 +2,7 @@
 
 #include "models/IGuidance.hpp"
 
-namespace sim::models 
-{
+namespace sim::models {
     /**
      * @brief True Proportional Navigation (TPN) guidance law.
      *

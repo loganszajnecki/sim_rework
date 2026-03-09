@@ -33,8 +33,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-namespace sim::math
-{
+namespace sim::math {
     /**
      * @brief 3D Vector class templated on scalar type.
      *

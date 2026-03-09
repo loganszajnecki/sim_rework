@@ -13,8 +13,7 @@
 #include <memory>
 #include <stdexcept>
 
-namespace sim::core
-{
+namespace sim::core {
     /**
      * @brief Aggregates all vehicle and environment subsystem models
      * 

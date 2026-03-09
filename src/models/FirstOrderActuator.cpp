@@ -3,7 +3,6 @@
 #include <algorithm>
 
 namespace sim::models {
-
     FirstOrderActuator::FirstOrderActuator()
         : cfg_{}
         , cmd_(sim::math::Vec3d::zero())
