@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(MissileSim
     VERSION 0.2.0
-    LANGUAGES CXX
+    LANGUAGES C CXX
     DESCRIPTION "6-DOF Missile Flight Simulation"
 )
 
@@ -10,12 +10,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_compile_options(
-    -Wall -Wextra -Wpedantic -Wshadow
-    -Wnon-virtual-dtor -Wcast-align -Wunused
-    -Woverloaded-virtual -Wconversion
-    -Wnull-dereference
-)
+function(apply_project_warnings target)
+    target_compile_options(${target} PRIVATE
+        -Wall -Wextra -Wpedantic -Wshadow
+        -Wnon-virtual-dtor -Wcast-align -Wunused
+        -Woverloaded-virtual -Wconversion 
+        -Wnull-dereference -Wdouble-promotion
+    )
+endfunction()
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type" FORCE)
@@ -89,3 +91,6 @@ if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+apply_project_warnings(sim_core)
+apply_project_warnings(missile_sim)
