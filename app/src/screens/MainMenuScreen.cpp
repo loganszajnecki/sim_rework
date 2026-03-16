@@ -5,14 +5,13 @@
 #include <imgui.h>
  
 #include "vis/SphereGenerator.hpp"
-#include "screens/MainMenuScreen.hpp"
 
 namespace app {
 
-    MainMenuScreen::MainMenuScreen(
-        const std::string &shaderDir, 
+	MainMenuScreen::MainMenuScreen(const std::string& shaderDir,
         const std::string &resDir) 
-        : shaderDir_(shaderDir), resDir_(resDir) {}
+    : shaderDir_(shaderDir)
+    , resDir_(resDir) {}
 
     MainMenuScreen::~MainMenuScreen() = default;
 
@@ -68,13 +67,12 @@ namespace app {
     
         earthModel_ = vis::TexturedModel(rawModel, earthMat);
         earthEntity_ = vis::Entity(&earthModel_,
-                                glm::vec3(0.0f, 0.0f, 0.0f),  // origin
+                                glm::vec3(1.25f, 0.5f, 0.0f),  // origin
                                 glm::vec3(0.0f, 0.0f, 0.0f),  // no initial rotation
                                 1.8f);                        // scale
     
         // Renderer
         master_ = std::make_unique<vis::MasterRenderer>(
-            camera_,
             shaderDir_ + "/entity.vert",
             shaderDir_ + "/entity.frag"
         );
@@ -107,15 +105,8 @@ namespace app {
         earthEntity_.rotation.x = 23.4f;
     
         // Handle ESC key.
-        // if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        //     quit_ = true;
-        // }
-    
-        // Update aspect ratio in case of resize.
-        int w = 0, h = 0;
-        glfwGetFramebufferSize(window_, &w, &h);
-        if (w > 0 && h > 0 && (w != fbW_ || h != fbH_)) {
-            onResize(w, h);
+        if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            quit_ = true;
         }
     }
 

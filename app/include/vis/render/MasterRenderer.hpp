@@ -25,8 +25,7 @@ namespace vis {
     public:
         using BatchMap = EntityRenderer::BatchMap;
 
-        MasterRenderer(const Camera& cam, 
-                       const std::string& vertPath,
+    	MasterRenderer(const std::string& vertPath,
                        const std::string& fragPath);
         
         MasterRenderer(const MasterRenderer&)            = delete;

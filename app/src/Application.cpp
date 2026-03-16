@@ -203,9 +203,15 @@ void Application::run() {
         if (dt > 0.1f) dt = 0.1f;
 
         // ── Framebuffer size (may change from callback) ──────
-        glfwGetFramebufferSize(window_, &fbW_, &fbH_);
-        if (fbW_ > 0 && fbH_ > 0) {
-            glViewport(0, 0, fbW_, fbH_);
+        int newW = 0, newH = 0;
+        glfwGetFramebufferSize(window_, &newW, &newH);
+        if (newW > 0 && newH > 0) {
+            glViewport(0, 0, newW, newH);
+            if (newW != fbW_ || newH != fbH_) {
+                fbW_ = newW;
+                fbH_ = newH;
+                active_->onResize(fbW_, fbH_);
+            }
         }
 
         // ── Frame ────────────────────────────────────────────

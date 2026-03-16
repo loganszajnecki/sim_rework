@@ -2,17 +2,11 @@
 
 namespace vis {
 
-    MasterRenderer::MasterRenderer(const Camera& cam,
-                                const std::string& vertPath,
+MasterRenderer::MasterRenderer(const std::string& vertPath,
                                 const std::string& fragPath)
         : shader_(vertPath, fragPath)
         , renderer_(shader_)
     {
-        // Load projection matrix once (reload if FOV/aspect changes).
-        shader_.start();
-        shader_.loadProjectionMatrix(cam);
-        shader_.stop();
-
         // Default GL state for 3D rendering.
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -34,6 +28,7 @@ namespace vis {
         shader_.start();
         shader_.loadSkyColor(skyColor_);
         shader_.loadLight(sun);
+    	shader_.loadProjectionMatrix(cam);
         shader_.loadViewMatrix(cam);
         renderer_.render(entities_);
         shader_.stop();
