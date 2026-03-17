@@ -68,7 +68,16 @@ namespace app {
         void beginFrame_();
         void endFrame_();
         void shutdown_();
+
+        /// Perform the actual screen switch (no fade, immediate).
+        void switchImmediate_(const std::string& name);
     
+        /// Render the fade overlay. Called after screen render, before ImGui finalize.
+        void renderFadeOverlay_();
+
+        /// Update fade state machine. Returns true if a deferred switch happened.
+        bool updateFade_(float dt);
+
         // GLFW / GL state
         GLFWwindow* window_      = nullptr;
         bool        initialized_ = false;
@@ -78,6 +87,13 @@ namespace app {
         std::unordered_map<std::string, std::unique_ptr<Screen>> screens_;
         Screen* active_ = nullptr;
         std::string activeName_;
+
+        // ── Fade transition ──────────────────────────────────────
+        enum class FadeState { idle, fading_out, fading_in };
+        FadeState   fadeState_    = FadeState::idle;
+        float       fadeAlpha_    = 0.0f;    // 0 = transparent, 1 = fully black
+        float       fadeDuration_ = 0.4f;    // seconds per half-transition
+        std::string pendingScreen_;          // screen to switch to after fade-out
     
         // Timing
         double lastTime_ = 0.0;

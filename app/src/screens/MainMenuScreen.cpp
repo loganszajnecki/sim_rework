@@ -87,6 +87,10 @@ namespace app {
     	starfield_.reset();
         master_.reset();
         loader_.cleanup();
+
+        // Reset UI state so the screen is clean if re-entered.
+        nextScreen_.clear();
+        quit_ = false;
     }
 
     void MainMenuScreen::onResize(int fbW, int fbH) {
@@ -182,7 +186,7 @@ namespace app {
         ImGui::Dummy(ImVec2(0, 6));
         ImGui::SetCursorPosX(btnX);
         if (ImGui::Button("Settings", ImVec2(btnWidth, btnHeight))) {
-            // Stubbed for now — will open a settings screen.
+        	nextScreen_ = "settings";
         }
     
         ImGui::Dummy(ImVec2(0, 6));

@@ -1,5 +1,6 @@
 #include "Application.hpp"
 #include "screens/MainMenuScreen.hpp"
+#include "screens/PlaceholderScreen.hpp"
 
 #include <iostream>
 #include <filesystem>
@@ -81,6 +82,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
     //     std::make_unique<app::ConfigScreen>(...));
     // application.registerScreen("viewer",
     //     std::make_unique<app::ViewerScreen>(...));
+    // Placeholder screens until real ones are built (Phase B, C).
+    application.registerScreen("config",
+        std::make_unique<app::PlaceholderScreen>("CONFIGURATION"));
+    application.registerScreen("viewer",
+        std::make_unique<app::PlaceholderScreen>("TRAJECTORY VIEWER"));
+    application.registerScreen("settings",
+        std::make_unique<app::PlaceholderScreen>("SETTINGS"));
 
     // Start on the main menu
     application.switchTo("main_menu");
