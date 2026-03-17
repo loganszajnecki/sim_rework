@@ -1,4 +1,0 @@
-{
-    "cmake.sourceDirectory": "${workspaceFolder}/app",
-    "C_Cpp.default.compileCommands": "${workspaceFolder}/app/build/compile_commands.json"
-}

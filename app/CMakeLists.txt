@@ -1,18 +1,12 @@
-cmake_minimum_required(VERSION 3.20)
-project(MissileSimApp
-    VERSION 0.1.0
-    LANGUAGES C CXX
-    DESCRIPTION "Missile Flight Simulator — Visualization Application"
-)
+# ==============================================================
+# Missile Flight Simulator — Visualization Application
+# ==============================================================
+# Built as a subdirectory of the top-level project.
+# Inherits C++20, build type, and compile_commands from parent.
+# Links against sim_core (from missile_sim/) for simulation access.
 
-# ── C++ Standard ──────────────────────────────────────────────
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# ── Compiler Warnings (per-target, not global) ───────────────
-# Applied only to our own code, not to third-party dependencies.
-function(apply_project_warnings target)
+# Compiler Warnings (per-target)
+function(apply_app_warnings target)
     target_compile_options(${target} PRIVATE
         -Wall -Wextra -Wpedantic -Wshadow
         -Wnon-virtual-dtor -Wcast-align -Wunused
@@ -21,20 +15,13 @@ function(apply_project_warnings target)
     )
 endfunction()
 
-# ── Build type default ────────────────────────────────────────
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
-endif()
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 include(FetchContent)
 
-# ══════════════════════════════════════════════════════════════
-# DEPENDENCIES
-# ══════════════════════════════════════════════════════════════
+# ==============================================================
+# GRAPHICS DEPENDENCIES (not needed by the sim)
+# ==============================================================
 
-# ── GLFW (windowing) ──────────────────────────────────────────
+# GLFW (windowing)
 set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -47,9 +34,9 @@ FetchContent_Declare(glfw
 )
 FetchContent_MakeAvailable(glfw)
 
-# ── glad (OpenGL loader) ──────────────────────────────────────
+# glad (OpenGL loader)
 # Uses the system-installed glad (v1) to generate a GL 4.1 Core loader.
-# On Ubuntu/Debian: sudo apt install python3-glad  (if not already present)
+# On Ubuntu/Debian: sudo apt install python3-glad
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 set(GLAD_OUT_DIR "${CMAKE_BINARY_DIR}/generated/glad")
@@ -77,7 +64,7 @@ endif()
 add_library(glad_gl STATIC "${GLAD_OUT_DIR}/src/glad.c")
 target_include_directories(glad_gl PUBLIC "${GLAD_OUT_DIR}/include")
 
-# ── GLM (math) ────────────────────────────────────────────────
+# GLM (math)
 FetchContent_Declare(glm
     GIT_REPOSITORY https://github.com/g-truc/glm.git
     GIT_TAG        1.0.1
@@ -85,8 +72,7 @@ FetchContent_Declare(glm
 )
 FetchContent_MakeAvailable(glm)
 
-# ── ImGui (UI) ────────────────────────────────────────────────
-# ImGui has no CMakeLists.txt, so we build it manually.
+# ImGui (UI)
 FetchContent_Declare(imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
     GIT_TAG        v1.91.8
@@ -109,8 +95,7 @@ target_include_directories(imgui PUBLIC
 )
 target_link_libraries(imgui PUBLIC glfw glad_gl)
 
-# ── stb_image (texture loading) ───────────────────────────────
-# Compiled in its own translation unit so project warnings don't apply.
+# stb_image (texture loading)
 FetchContent_Declare(stb
     GIT_REPOSITORY https://github.com/nothings/stb.git
     GIT_TAG        master
@@ -121,31 +106,31 @@ FetchContent_MakeAvailable(stb)
 add_library(stb_image STATIC src/vis/stb_image_impl.c)
 target_include_directories(stb_image PUBLIC ${stb_SOURCE_DIR})
 
-# ══════════════════════════════════════════════════════════════
+# ==============================================================
 # APPLICATION TARGET
-# ══════════════════════════════════════════════════════════════
+# ==============================================================
 
 set(APP_SOURCES
-    # Entry point
+    # == Entry point ===========================================
     main.cpp
 
-    # Application core
+    # == Application core ======================================
     src/Application.cpp
 
-    # Screens
+    # == Screens ===============================================
     src/screens/MainMenuScreen.cpp
 
-    # Vis: shaders
+    # == Vis: shaders ==========================================
     src/vis/shaders/ShaderProgram.cpp
     src/vis/shaders/EntityShader.cpp
     src/vis/shaders/StarfieldShader.cpp
 
-    # Vis: rendering
+    # == Vis: rendering ========================================
     src/vis/render/EntityRenderer.cpp
     src/vis/render/MasterRenderer.cpp
     src/vis/render/StarfieldRenderer.cpp
 
-    # Vis: loaders / generators
+    # == Vis: loaders / generators =============================
     src/vis/Loader.cpp
     src/vis/SphereGenerator.cpp
 )
@@ -157,6 +142,7 @@ target_include_directories(missile_app PRIVATE
 )
 
 target_link_libraries(missile_app PRIVATE
+    sim_core        # simulation library (SimConfig, SimRunner, VehicleFactory, etc.)
     glfw
     glad_gl
     glm::glm
@@ -164,11 +150,9 @@ target_link_libraries(missile_app PRIVATE
     stb_image
 )
 
-# Apply strict warnings only to our own code.
-apply_project_warnings(missile_app)
+apply_app_warnings(missile_app)
 
-# ── Copy shader and resource files to build directory ─────────
-# This ensures the app can find shaders/ and res/ when run from build/.
+# Symlink shaders/ and res/ into the build directory
 add_custom_command(TARGET missile_app POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E create_symlink
         ${CMAKE_CURRENT_SOURCE_DIR}/shaders
@@ -179,7 +163,6 @@ add_custom_command(TARGET missile_app POST_BUILD
     COMMENT "Symlinking shaders/ and res/ to build directory"
 )
 
-# ── Print build info ──────────────────────────────────────────
 message(STATUS "═══════════════════════════════════════════════")
 message(STATUS "  Missile Flight Simulator App")
 message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
