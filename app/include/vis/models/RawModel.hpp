@@ -20,8 +20,8 @@ namespace vis {
         GLsizei indexCount = 0;
 
         RawModel() = default;
-        RawModel(GLuint vao,  GLsizei count)
-            : vao(vao), indexCount(count) {}
+        RawModel(GLuint vaoIn,  GLsizei count)
+            : vao(vaoIn), indexCount(count) {}
     };
 
 } // namespace vis

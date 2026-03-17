@@ -42,7 +42,6 @@ namespace vis {
         void setSkyColor(const glm::vec3& rgb) { skyColor_ = rgb; }
     
     private:
-        void prepare();
 
         glm::vec3 skyColor_{0.01f, 0.01f, 0.02f};
         

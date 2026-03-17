@@ -126,24 +126,26 @@ target_include_directories(stb_image PUBLIC ${stb_SOURCE_DIR})
 # ══════════════════════════════════════════════════════════════
 
 set(APP_SOURCES
-    # ── Entry point ───────────────────────────────────────────
+    # Entry point
     main.cpp
 
-    # ── Application core ──────────────────────────────────────
+    # Application core
     src/Application.cpp
 
-    # ── Screens ───────────────────────────────────────────────
+    # Screens
     src/screens/MainMenuScreen.cpp
 
-    # ── Vis: shaders ──────────────────────────────────────────
+    # Vis: shaders
     src/vis/shaders/ShaderProgram.cpp
     src/vis/shaders/EntityShader.cpp
+    src/vis/shaders/StarfieldShader.cpp
 
-    # ── Vis: rendering ────────────────────────────────────────
+    # Vis: rendering
     src/vis/render/EntityRenderer.cpp
     src/vis/render/MasterRenderer.cpp
+    src/vis/render/StarfieldRenderer.cpp
 
-    # ── Vis: loaders / generators ─────────────────────────────
+    # Vis: loaders / generators
     src/vis/Loader.cpp
     src/vis/SphereGenerator.cpp
 )

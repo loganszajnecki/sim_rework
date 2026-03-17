@@ -20,7 +20,7 @@ namespace vis {
      *   3. Uploads per-instance transform matrices.
      *   4. Issues glDrawElements calls.
      * 
-     * The called (MasterRenderer) must have already started the shader
+     * The caller (MasterRenderer) must have already started the shader
      * and loaded projection/view/light uniforms.
      */
     class EntityRenderer

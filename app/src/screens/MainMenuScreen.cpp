@@ -76,10 +76,15 @@ namespace app {
             shaderDir_ + "/entity.vert",
             shaderDir_ + "/entity.frag"
         );
-        master_->setSkyColor(glm::vec3(0.01f, 0.01f, 0.02f));  // near-black space
+    	master_->setSkyColor(glm::vec3(0.005f, 0.005f, 0.01f));  // very dark space
+        
+        // Starfield
+        starfield_ = std::make_unique<vis::StarfieldRenderer>(
+            shaderDir_, 16000, 10.0f);     // 4000 stars on a sphere of radius 80
     }
 
     void MainMenuScreen::leave() {
+    	starfield_.reset();
         master_.reset();
         loader_.cleanup();
     }
@@ -112,6 +117,12 @@ namespace app {
 
     void MainMenuScreen::render() {
         // 3D scene
+        glClearColor(0.005f, 0.005f, 0.01f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    	
+        // Starfield behind everything
+        starfield_->render(camera_);
+
         master_->processEntity(earthEntity_);
         master_->render(sun_, camera_);
     

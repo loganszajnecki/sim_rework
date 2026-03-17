@@ -23,7 +23,6 @@ MasterRenderer::MasterRenderer(const std::string& vertPath,
     }
 
     void MasterRenderer::render(const Light& sun, const Camera& cam) {
-        prepare();
 
         shader_.start();
         shader_.loadSkyColor(skyColor_);
@@ -34,11 +33,6 @@ MasterRenderer::MasterRenderer(const std::string& vertPath,
         shader_.stop();
 
         entities_.clear();
-    }
-
-    void MasterRenderer::prepare() {
-        glClearColor(skyColor_.r, skyColor_.g, skyColor_.b, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
 } // namespace vis

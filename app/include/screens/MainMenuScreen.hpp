@@ -7,6 +7,7 @@
 #include "vis/entities/Light.hpp"
 #include "vis/models/TexturedModel.hpp"
 #include "vis/render/MasterRenderer.hpp"
+#include "vis/render/StarfieldRenderer.hpp"
 #include "vis/Loader.hpp"
 
 #include <memory>
@@ -70,6 +71,7 @@ namespace app {
         vis::Entity         earthEntity_;
 
         std::unique_ptr<vis::MasterRenderer> master_;
+    	std::unique_ptr<vis::StarfieldRenderer> starfield_;
 
         // Animation
         float earthRotation_ = 0.0f; // degrees, current Z rotation
