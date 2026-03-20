@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Screen.hpp"
+#include "ImGuiConsoleSink.hpp"
 
 #include "vis/Camera.hpp"
 #include "vis/Framebuffer.hpp"
@@ -9,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <deque>
 
 struct GLFWwindow;
 
@@ -64,9 +66,6 @@ namespace app {
         // 3D Viewport rendering
         void renderSceneToFBO_();
 
-        // Console helpers
-        void logMessage_(const std::string& msg);
-
         // Paths
         std::string shaderDir_;
         std::string resDir_;
@@ -81,9 +80,19 @@ namespace app {
         std::unique_ptr<vis::GridRenderer>  grid_;
         int viewportW_ = 800, viewportH_ = 600;
 
-        // Console
-        std::vector<std::string> consoleLog_;
-        bool consoleScrollToBottom_ = false;
+        // Console (unified spdlog sink)
+	    std::shared_ptr<ImGuiConsoleSink>  consoleSink_;
+	    std::deque<ConsoleEntry>           consoleHistory_;
+	    bool consoleAutoScroll_ = true;
+	    static constexpr size_t kMaxConsoleHistory = 5000;
+
+        // Console filter
+	    bool showTrace_    = false;
+	    bool showDebug_    = false;
+	    bool showInfo_     = true;
+	    bool showWarn_     = true;
+	    bool showError_    = true;
+	    bool showCritical_ = true;
 
         // UI state
         bool        quit_       = false;

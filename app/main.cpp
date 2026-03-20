@@ -3,8 +3,10 @@
 #include "screens/WorkspaceScreen.hpp"
 #include "screens/PlaceholderScreen.hpp"
 
+#include "core/Logger.hpp"    // sim logger — must init before screens
 #include <iostream>
 #include <filesystem>
+#include <spdlog/spdlog.h>
 
 /**
  * @brief Locate the resource directories relative to the executable.
@@ -74,16 +76,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return 1;
     }
 
-    // Register screens
+    // Initialize sim logger
+    // Must happen before screens attach sinks. Console sink (stderr)
+    // and file sink are set up here; the workspace adds its ImGui
+    // sink on enter().
+    sim::core::Logger::init("missile_app.log", spdlog::level::info);
     application.registerScreen("main_menu",
         std::make_unique<app::MainMenuScreen>(paths.shaders, paths.res));
 
-    // Future screens will be registered here:
-    // application.registerScreen("config",
-    //     std::make_unique<app::ConfigScreen>(...));
-    // application.registerScreen("viewer",
-    //     std::make_unique<app::ViewerScreen>(...));
-    // Placeholder screens until real ones are built (Phase B, C).
     application.registerScreen("config",
         std::make_unique<app::WorkspaceScreen>(paths.shaders, paths.res));
     application.registerScreen("viewer",

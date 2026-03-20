@@ -8,21 +8,44 @@
 #include <imgui_internal.h>   // for DockBuilder API
 #pragma GCC diagnostic pop
 
-#include <cmath>
-#include <chrono>
-#include <sstream>
-#include <iomanip>
+#include "core/Logger.hpp"    // sim logger — SIM_INFO, etc.
 
 namespace app {
 
-    // ── Panel ID constants ───────────────────────────────────────
+    // Panel ID constants
     // These must match the names passed to ImGui::Begin() for each panel.
     static const char* kViewportPanel   = "3D Viewport";
     static const char* kPropertiesPanel = "Properties";
     static const char* kConsolePanel    = "Console";
     static const char* kDockSpaceName   = "WorkspaceDockSpace";
 
-    // ── Lifecycle ────────────────────────────────────────────────
+    // Log level constants
+    static ImVec4 levelColor(spdlog::level::level_enum level) {
+        switch (level) {
+            case spdlog::level::trace:    return {0.5f, 0.5f, 0.5f, 1.0f};
+            case spdlog::level::debug:    return {0.6f, 0.7f, 0.8f, 1.0f};
+            case spdlog::level::info:     return {0.8f, 0.9f, 1.0f, 1.0f};
+            case spdlog::level::warn:     return {1.0f, 0.85f, 0.3f, 1.0f};
+            case spdlog::level::err:      return {1.0f, 0.4f, 0.4f, 1.0f};
+            case spdlog::level::critical: return {1.0f, 0.2f, 0.2f, 1.0f};
+            default:                      return {1.0f, 1.0f, 1.0f, 1.0f};
+        }
+    }
+    static bool shouldShow(spdlog::level::level_enum level,
+                        bool trace, bool debug, bool info,
+                        bool warn, bool error, bool critical) {
+        switch (level) {
+            case spdlog::level::trace:    return trace;
+            case spdlog::level::debug:    return debug;
+            case spdlog::level::info:     return info;
+            case spdlog::level::warn:     return warn;
+            case spdlog::level::err:      return error;
+            case spdlog::level::critical: return critical;
+            default:                      return true;
+        }
+    }
+
+    // Lifecycle
 
     WorkspaceScreen::WorkspaceScreen(const std::string& shaderDir,
                                     const std::string& resDir)
@@ -36,7 +59,7 @@ namespace app {
         fbW_    = fbW;
         fbH_    = fbH;
 
-        // ── Viewport camera ──────────────────────────────────────
+        // Viewport camera
         float aspect = (fbW_ > 0 && fbH_ > 0)
                     ? static_cast<float>(fbW_) / static_cast<float>(fbH_)
                     : 16.0f / 9.0f;
@@ -47,24 +70,34 @@ namespace app {
             45.0f, aspect, 0.1f, 10000.0f       // wide far plane for large scenes
         );
 
-        // ── FBO for viewport ─────────────────────────────────────
+        // FBO for viewport
         viewportFBO_ = vis::Framebuffer(viewportW_, viewportH_);
 
-        // ── Grid ─────────────────────────────────────────────────
+        // Grid
         grid_ = std::make_unique<vis::GridRenderer>(
             shaderDir_, 50.0f, 5.0f    // 50m extent, 5m spacing
         );
 
-        // ── Console ──────────────────────────────────────────────
-        consoleLog_.clear();
-        logMessage_("Workspace initialized.");
-        logMessage_("Ready.");
+        // Console sink
+	    consoleSink_ = std::make_shared<ImGuiConsoleSink>();
+	    consoleSink_->set_pattern("[%H:%M:%S.%e] [%^%l%$] %v");
+	    sim::core::Logger::get()->sinks().push_back(consoleSink_);
+    	consoleHistory_.clear();
 
         // Force dock layout rebuild on first frame.
         dockLayoutBuilt_ = false;
+    	SIM_INFO("Workspace initialized.");
     }
 
     void WorkspaceScreen::leave() {
+	    // Remove our sink from the sim logger
+	    if (consoleSink_) {
+	        auto& sinks = sim::core::Logger::get()->sinks();
+	        sinks.erase(
+	            std::remove(sinks.begin(), sinks.end(), consoleSink_),
+	            sinks.end());
+	        consoleSink_.reset();
+	    }
         grid_.reset();
         viewportFBO_ = vis::Framebuffer();   // destroy FBO
 
@@ -77,7 +110,7 @@ namespace app {
         fbH_ = fbH;
     }
 
-    // ── Update ───────────────────────────────────────────────────
+    // Update
 
     void WorkspaceScreen::update(float /*dt*/) {
         // ESC returns to main menu.
@@ -85,18 +118,27 @@ namespace app {
             nextScreen_ = "main_menu";
         }
 
-        // Basic scroll-to-zoom on the viewport camera.
-        // (Full orbit controls will be added in a later phase.)
+        // Drain sink into history
+        if (consoleSink_) {
+            auto entries = consoleSink_->drain();
+            for (auto& e : entries) {
+                consoleHistory_.push_back(std::move(e));
+            }
+            // Trim history.
+            while (consoleHistory_.size() > kMaxConsoleHistory) {
+                consoleHistory_.pop_front();
+            }
+        }
     }
 
-    // ── Render ───────────────────────────────────────────────────
+    // Render
 
     void WorkspaceScreen::render() {
         // Clear the main framebuffer (behind ImGui).
         glClearColor(0.10f, 0.10f, 0.12f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // ── DockSpace ────────────────────────────────────────────
+        // DockSpace
         // Create a full-screen dockable area with a menu bar.
         ImGuiViewport* vp = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(vp->WorkPos);
@@ -120,10 +162,10 @@ namespace app {
         ImGui::Begin("##WorkspaceHost", nullptr, hostFlags);
         ImGui::PopStyleVar(3);
 
-        // ── Menu bar ─────────────────────────────────────────────
+        // Menu bar
         renderMenuBar_();
 
-        // ── Create the DockSpace ─────────────────────────────────
+        // Create the DockSpace
         ImGuiID dockId = ImGui::GetID(kDockSpaceName);
         ImGui::DockSpace(dockId, ImVec2(0.0f, 0.0f),
                         ImGuiDockNodeFlags_PassthruCentralNode);
@@ -136,7 +178,7 @@ namespace app {
 
         ImGui::End();  // WorkspaceHost
 
-        // ── Panels ───────────────────────────────────────────────
+        // Panels
         if (showViewport_)   renderViewportPanel_();
         if (showProperties_) renderPropertiesPanel_();
         if (showConsole_)    renderConsolePanel_();
@@ -177,16 +219,16 @@ namespace app {
 
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("New Simulation", "Ctrl+N")) {
-                    logMessage_("New simulation created (defaults).");
+                	SIM_INFO("New simulation created (defaults).");
                 }
                 if (ImGui::MenuItem("Open Config...", "Ctrl+O")) {
-                    logMessage_("Open config (not yet implemented).");
+                	SIM_INFO("Open config (not yet implemented).");
                 }
                 if (ImGui::MenuItem("Save Config", "Ctrl+S")) {
-                    logMessage_("Save config (not yet implemented).");
+                	SIM_INFO("Save config (not yet implemented).");
                 }
                 if (ImGui::MenuItem("Save Config As...")) {
-                    logMessage_("Save config as (not yet implemented).");
+                	SIM_INFO("Save config as (not yet implemented).");
                 }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit to Main Menu")) {
@@ -217,10 +259,10 @@ namespace app {
 
             if (ImGui::BeginMenu("Simulation")) {
                 if (ImGui::MenuItem("Run", "F5")) {
-                    logMessage_("Run simulation (not yet implemented).");
+                	SIM_INFO("Run simulation (not yet implemented).");
                 }
                 if (ImGui::MenuItem("Run Monte Carlo")) {
-                    logMessage_("Monte Carlo (not yet implemented).");
+                	SIM_INFO("Monte Carlo (not yet implemented).");
                 }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Stop", nullptr, false, false)) {}
@@ -229,7 +271,7 @@ namespace app {
 
             if (ImGui::BeginMenu("Help")) {
                 if (ImGui::MenuItem("About")) {
-                    logMessage_("Missile Flight Simulator v0.2.0");
+                	SIM_INFO("Missile Flight Simulator v3.1.0-alpha");
                 }
                 ImGui::EndMenu();
             }
@@ -238,7 +280,7 @@ namespace app {
         }
     }
 
-    // ── 3D Viewport ──────────────────────────────────────────────
+    // 3D Viewport
 
     void WorkspaceScreen::renderSceneToFBO_() {
         viewportFBO_.bind();
@@ -284,7 +326,7 @@ namespace app {
         ImGui::PopStyleVar();
     }
 
-    // ── Properties panel ─────────────────────────────────────────
+    // Properties panel
 
     void WorkspaceScreen::renderPropertiesPanel_() {
         ImGui::Begin(kPropertiesPanel, &showProperties_);
@@ -353,48 +395,66 @@ namespace app {
         ImGui::End();
     }
 
-    // ── Console panel ────────────────────────────────────────────
+    // Console panel
 
     void WorkspaceScreen::renderConsolePanel_() {
         ImGui::Begin(kConsolePanel, &showConsole_);
 
-        // Toolbar.
+        // Toolbar
         if (ImGui::SmallButton("Clear")) {
-            consoleLog_.clear();
+            consoleHistory_.clear();
         }
         ImGui::SameLine();
-        ImGui::TextDisabled("(%d messages)", static_cast<int>(consoleLog_.size()));
+        ImGui::TextDisabled("(%d)", static_cast<int>(consoleHistory_.size()));
+
+        ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
+
+        // Level filter toggles.
+        ImGui::PushStyleColor(ImGuiCol_Text, levelColor(spdlog::level::info));
+        ImGui::SameLine(); ImGui::Checkbox("Info", &showInfo_);
+        ImGui::PopStyleColor();
+
+        ImGui::PushStyleColor(ImGuiCol_Text, levelColor(spdlog::level::warn));
+        ImGui::SameLine(); ImGui::Checkbox("Warn", &showWarn_);
+        ImGui::PopStyleColor();
+
+        ImGui::PushStyleColor(ImGuiCol_Text, levelColor(spdlog::level::err));
+        ImGui::SameLine(); ImGui::Checkbox("Error", &showError_);
+        ImGui::PopStyleColor();
+
+        ImGui::PushStyleColor(ImGuiCol_Text, levelColor(spdlog::level::debug));
+        ImGui::SameLine(); ImGui::Checkbox("Debug", &showDebug_);
+        ImGui::PopStyleColor();
+
+        ImGui::SameLine();
+        ImGui::Checkbox("Auto-scroll", &consoleAutoScroll_);
+
         ImGui::Separator();
 
-        // Scrollable log area.
+        // Log entries
         ImGui::BeginChild("##ConsoleScroll", ImVec2(0, 0), false,
                         ImGuiWindowFlags_HorizontalScrollbar);
 
-        for (const auto& msg : consoleLog_) {
-            ImGui::TextUnformatted(msg.c_str());
+        for (const auto& entry : consoleHistory_) {
+            if (!shouldShow(entry.level, showTrace_, showDebug_, showInfo_,
+                            showWarn_, showError_, showCritical_)) {
+                continue;
+            }
+
+            ImGui::PushStyleColor(ImGuiCol_Text, levelColor(entry.level));
+            ImGui::TextUnformatted(entry.text.c_str());
+            ImGui::PopStyleColor();
         }
 
-        // Auto-scroll to bottom when new messages arrive.
-        if (consoleScrollToBottom_) {
+        // Auto-scroll to bottom on new messages.
+        if (consoleAutoScroll_ && ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 10.0f) {
             ImGui::SetScrollHereY(1.0f);
-            consoleScrollToBottom_ = false;
         }
 
         ImGui::EndChild();
         ImGui::End();
-    }
-
-    void WorkspaceScreen::logMessage_(const std::string& msg) {
-        // Timestamp the message.
-        auto now = std::chrono::system_clock::now();
-        auto time = std::chrono::system_clock::to_time_t(now);
-        std::tm tm{};
-        localtime_r(&time, &tm);
-
-        std::ostringstream oss;
-        oss << "[" << std::put_time(&tm, "%H:%M:%S") << "] " << msg;
-        consoleLog_.push_back(oss.str());
-        consoleScrollToBottom_ = true;
     }
 
 } // namespace app

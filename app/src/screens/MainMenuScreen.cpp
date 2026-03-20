@@ -197,7 +197,7 @@ namespace app {
     
         // Version footer
         ImGui::Dummy(ImVec2(0, 12));
-        const char* ver = "v3.0.0-alpha";
+        const char* ver = "v3.1.0-alpha";
         float verWidth = ImGui::CalcTextSize(ver).x;
         ImGui::SetCursorPosX((panelWidth - verWidth) * 0.5f);
         ImGui::TextDisabled("%s", ver);
