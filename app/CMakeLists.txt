@@ -75,7 +75,7 @@ FetchContent_MakeAvailable(glm)
 # ImGui (UI)
 FetchContent_Declare(imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG        v1.91.8
+    GIT_TAG        docking
     GIT_SHALLOW    TRUE
 )
 FetchContent_MakeAvailable(imgui)
@@ -119,20 +119,24 @@ set(APP_SOURCES
 
     # == Screens ===============================================
     src/screens/MainMenuScreen.cpp
+    src/screens/WorkspaceScreen.cpp
 
     # == Vis: shaders ==========================================
     src/vis/shaders/ShaderProgram.cpp
     src/vis/shaders/EntityShader.cpp
     src/vis/shaders/StarfieldShader.cpp
+    src/vis/shaders/LineShader.cpp
 
     # == Vis: rendering ========================================
     src/vis/render/EntityRenderer.cpp
     src/vis/render/MasterRenderer.cpp
     src/vis/render/StarfieldRenderer.cpp
+    src/vis/render/GridRenderer.cpp
 
     # == Vis: loaders / generators =============================
     src/vis/Loader.cpp
     src/vis/SphereGenerator.cpp
+    src/vis/Framebuffer.cpp
 )
 
 add_executable(missile_app ${APP_SOURCES})

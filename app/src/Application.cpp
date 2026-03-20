@@ -83,6 +83,7 @@ namespace app {
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
         // Dark theme as base, then customize.
         ImGui::StyleColorsDark();
