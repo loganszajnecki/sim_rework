@@ -153,11 +153,11 @@ Warning flags are per-target via `apply_sim_warnings()` and `apply_app_warnings(
 3. Propulsion -> thrust force/moment, mass flow, inertia
 4. Actuator -> current fin deflections (if guided, else zero)
 5. Aerodynamics -> body forces and moments
-6. Translational kinematics: pdot_NED = L_bi × V_body
-7. Translational dynamics: V̇_body = g_body + (F_thrust + F_aero)/m - omega x V
-8. Rotational kinematics: Euler_dot = H(phi,theta) × [p,q,r]
-9. Rotational dynamics: omega_dot= inv(I) * (M_total - omega x (I*omega))
-10. Mass: m_dot = mass_flow_rate
+6. Translational kinematics: ṗ_NED = L_bi × V_body
+7. Translational dynamics: V̇_body = g_body + (F_thrust + F_aero)/m - ω×V
+8. Rotational kinematics: Euler_dot = H(φ,θ) × [p,q,r]
+9. Rotational dynamics: ω̇ = I⁻¹(M_total - ω×(Iω))
+10. Mass: ṁ = mass_flow_rate
 
 **SimRunner:**
 `SimResult SimRunner::run(SimConfig, DataRecorder*, run_id)` - builds Vehicle and State from config, runs the integration loop, handles three termination conditions: `closest_approach`, `ground_impact`, `timeout`. Returns SimResult with miss_distance, POCA time, impact speed, max altitude/speed/Mach. Supports `set_verbose(false)` and `set_logging(false)` for silent batch runs.
