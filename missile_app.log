@@ -1,0 +1,4 @@
+[19:54:39.145] [info] New simulation configuration (defaults).
+[19:54:39.145] [info] Workspace initialized.
+[19:54:41.132] [error] Failed to parse XML: File was not found at offset 0
+[19:54:41.132] [error] Failed to load config: Failed to parse XML: File was not found at offset 0

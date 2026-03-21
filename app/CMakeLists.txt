@@ -106,6 +106,11 @@ FetchContent_MakeAvailable(stb)
 add_library(stb_image STATIC src/vis/stb_image_impl.c)
 target_include_directories(stb_image PUBLIC ${stb_SOURCE_DIR})
 
+# ── tinyfiledialogs (native file dialogs) ─────────────────────
+# Vendored from https://sourceforge.net/projects/tinyfiledialogs/
+add_library(tinyfiledialogs STATIC third_party/tinyfiledialogs/tinyfiledialogs.c)
+target_include_directories(tinyfiledialogs PUBLIC third_party/tinyfiledialogs)
+
 # ==============================================================
 # APPLICATION TARGET
 # ==============================================================
@@ -152,6 +157,7 @@ target_link_libraries(missile_app PRIVATE
     glm::glm
     imgui
     stb_image
+    tinyfiledialogs
 )
 
 apply_app_warnings(missile_app)

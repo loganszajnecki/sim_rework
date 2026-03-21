@@ -30,6 +30,17 @@ public:
     [[nodiscard]] static SimConfig load(const std::string& filepath);
 
     /**
+     * @brief Write a SimConfig to an XML file.
+     *
+     * Serializes all fields of the config, including optional GNC
+     * models and all targets. The output XML is loadable by load().
+     *
+     * @param cfg       Configuration to serialize
+     * @param filepath  Output path for the XML file
+     */
+    static void save(const SimConfig& cfg, const std::string& filepath);
+
+    /**
      * @brief Write a default configuration template to disk.
      * @param filepath  Output path for the XML file
      */

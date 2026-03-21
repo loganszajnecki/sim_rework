@@ -310,6 +310,155 @@ namespace sim::core {
         return cfg;
     }
 
+    void ConfigParser::save(const SimConfig& cfg, const std::string& filepath) {
+        pugi::xml_document doc;
+ 
+        // XML declaration
+        auto decl = doc.prepend_child(pugi::node_declaration);
+        decl.append_attribute("version") = "1.0";
+        decl.append_attribute("encoding") = "UTF-8";
+ 
+        auto root = doc.append_child("simulation");
+ 
+        // Integrator
+        auto integ = root.append_child("integrator");
+        integ.append_attribute("type") = cfg.integrator.type.c_str();
+        integ.append_attribute("dt") = cfg.integrator.dt;
+ 
+        // Recorder
+        auto rec = root.append_child("recorder");
+        rec.append_attribute("filepath") = cfg.recorder.filepath.c_str();
+        rec.append_attribute("interval") = cfg.recorder.interval;
+ 
+        // Initial conditions
+        auto ic = root.append_child("initial_conditions");
+        auto pos = ic.append_child("position");
+        pos.append_attribute("north") = cfg.initial_conditions.position.x();
+        pos.append_attribute("east")  = cfg.initial_conditions.position.y();
+        pos.append_attribute("down")  = cfg.initial_conditions.position.z();
+        ic.append_child("speed").text().set(cfg.initial_conditions.speed);
+        ic.append_child("pitch_deg").text().set(cfg.initial_conditions.pitch_deg);
+        ic.append_child("yaw_deg").text().set(cfg.initial_conditions.yaw_deg);
+        ic.append_child("roll_deg").text().set(cfg.initial_conditions.roll_deg);
+ 
+        // Vehicle
+        auto veh = root.append_child("vehicle");
+        veh.append_attribute("ref_area") = cfg.vehicle.ref_area;
+        veh.append_attribute("ref_length") = cfg.vehicle.ref_length;
+ 
+        // Atmosphere
+        auto atm = veh.append_child("atmosphere");
+        atm.append_attribute("type") = cfg.vehicle.atmosphere.type.c_str();
+ 
+        // Gravity
+        auto grav = veh.append_child("gravity");
+        grav.append_attribute("type") = cfg.vehicle.gravity.type.c_str();
+        grav.append_attribute("g") = cfg.vehicle.gravity.g;
+ 
+        // Propulsion
+        auto prop = veh.append_child("propulsion");
+        prop.append_attribute("type") = cfg.vehicle.propulsion.type.c_str();
+        prop.append_child("thrust").text().set(cfg.vehicle.propulsion.thrust);
+        prop.append_child("burn_time").text().set(cfg.vehicle.propulsion.burn_time);
+        prop.append_child("total_mass").text().set(cfg.vehicle.propulsion.total_mass);
+        prop.append_child("prop_mass").text().set(cfg.vehicle.propulsion.prop_mass);
+ 
+        // Inertia: store as magnitudes (positive values); the load()
+        // function applies the aerospace sign convention (negated off-diagonals).
+        const auto& I = cfg.vehicle.propulsion.inertia;
+        auto inertia = prop.append_child("inertia");
+        inertia.append_attribute("Ixx") = I(0, 0);
+        inertia.append_attribute("Iyy") = I(1, 1);
+        inertia.append_attribute("Izz") = I(2, 2);
+        inertia.append_attribute("Ixy") = std::abs(I(0, 1));
+        inertia.append_attribute("Ixz") = std::abs(I(0, 2));
+        inertia.append_attribute("Iyz") = std::abs(I(1, 2));
+ 
+        auto cg = prop.append_child("cg");
+        cg.append_attribute("x") = cfg.vehicle.propulsion.cg_body.x();
+        cg.append_attribute("y") = cfg.vehicle.propulsion.cg_body.y();
+        cg.append_attribute("z") = cfg.vehicle.propulsion.cg_body.z();
+ 
+        // Aerodynamics
+        auto aero = veh.append_child("aerodynamics");
+        aero.append_attribute("type") = cfg.vehicle.aerodynamics.type.c_str();
+        aero.append_child("CA").text().set(cfg.vehicle.aerodynamics.CA);
+        aero.append_child("CN_alpha").text().set(cfg.vehicle.aerodynamics.CN_alpha);
+        aero.append_child("CY_beta").text().set(cfg.vehicle.aerodynamics.CY_beta);
+        aero.append_child("Cm_alpha").text().set(cfg.vehicle.aerodynamics.Cm_alpha);
+        aero.append_child("Cn_beta").text().set(cfg.vehicle.aerodynamics.Cn_beta);
+        aero.append_child("Cl_delta").text().set(cfg.vehicle.aerodynamics.Cl_delta);
+        aero.append_child("Cm_delta").text().set(cfg.vehicle.aerodynamics.Cm_delta);
+        aero.append_child("Cn_delta").text().set(cfg.vehicle.aerodynamics.Cn_delta);
+        aero.append_child("Cmq").text().set(cfg.vehicle.aerodynamics.Cmq);
+        aero.append_child("Cnr").text().set(cfg.vehicle.aerodynamics.Cnr);
+        aero.append_child("Clp").text().set(cfg.vehicle.aerodynamics.Clp);
+ 
+        // GNC chain (optional - only write if present)
+        if (cfg.vehicle.seeker.has_value()) {
+            const auto& s = cfg.vehicle.seeker.value();
+            auto seeker = veh.append_child("seeker");
+            seeker.append_attribute("type") = s.type.c_str();
+            seeker.append_attribute("min_range") = s.min_range;
+        }
+ 
+        if (cfg.vehicle.guidance.has_value()) {
+            const auto& g = cfg.vehicle.guidance.value();
+            auto guidance = veh.append_child("guidance");
+            guidance.append_attribute("type") = g.type.c_str();
+            guidance.append_attribute("nav_ratio") = g.nav_ratio;
+        }
+ 
+        if (cfg.vehicle.autopilot.has_value()) {
+            const auto& a = cfg.vehicle.autopilot.value();
+            auto ap = veh.append_child("autopilot");
+            ap.append_attribute("type") = a.type.c_str();
+            ap.append_child("Kp").text().set(a.Kp);
+            ap.append_child("Kd").text().set(a.Kd);
+            ap.append_child("Kd_roll").text().set(a.Kd_roll);
+            ap.append_child("max_deflection").text().set(a.max_deflection);
+        }
+ 
+        if (cfg.vehicle.actuator.has_value()) {
+            const auto& act = cfg.vehicle.actuator.value();
+            auto actuator = veh.append_child("actuator");
+            actuator.append_attribute("type") = act.type.c_str();
+            actuator.append_attribute("time_constant") = act.time_constant;
+            actuator.append_attribute("max_deflection") = act.max_deflection;
+            actuator.append_attribute("max_rate") = act.max_rate;
+        }
+ 
+        // Stop conditions
+        auto stop = root.append_child("stop_conditions");
+        stop.append_child("max_time").text().set(cfg.stop.max_time);
+        stop.append_child("min_altitude").text().set(cfg.stop.min_altitude);
+        stop.append_child("poca_range_gate").text().set(cfg.stop.poca_range_gate);
+ 
+        // Targets
+        for (const auto& tgt : cfg.targets) {
+            auto target = root.append_child("target");
+            target.append_attribute("type") = tgt.type.c_str();
+ 
+            auto tpos = target.append_child("position");
+            tpos.append_attribute("north") = tgt.position.x();
+            tpos.append_attribute("east")  = tgt.position.y();
+            tpos.append_attribute("down")  = tgt.position.z();
+ 
+            auto tvel = target.append_child("velocity");
+            tvel.append_attribute("north") = tgt.velocity.x();
+            tvel.append_attribute("east")  = tgt.velocity.y();
+            tvel.append_attribute("down")  = tgt.velocity.z();
+ 
+            if (tgt.type == "maneuvering") {
+                target.append_child("maneuver_g").text().set(tgt.maneuver_g);
+                target.append_child("maneuver_start").text().set(tgt.maneuver_start);
+            }
+        }
+ 
+        doc.save_file(filepath.c_str(), "  ");
+        SIM_INFO("Configuration saved to {}", filepath);
+    }
+
     void ConfigParser::save_template(const std::string& filepath) {
         pugi::xml_document doc;
 
@@ -410,7 +559,5 @@ namespace sim::core {
         doc.save_file(filepath.c_str(), "  ");
         SIM_INFO("Template configuration written to {}", filepath);
     }
-
-
 
 } // namespace sim::core

@@ -7,6 +7,8 @@
 #include "vis/Framebuffer.hpp"
 #include "vis/render/GridRenderer.hpp"
 
+#include "core/SimConfig.hpp"    // sim config structs
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -63,8 +65,23 @@ namespace app {
         void renderPropertiesPanel_();
         void renderConsolePanel_();
 
+        // Properties sub-sections
+        void renderInitialConditions_();
+        void renderVehicle_();
+        void renderPropulsion_();
+        void renderAerodynamics_();
+        void renderGNC_();
+        void renderTargets_();
+        void renderSimSettings_();
+
         // 3D Viewport rendering
         void renderSceneToFBO_();
+
+        // File operations
+        void newConfig_();
+        void openConfig_();
+        void saveConfig_();
+        void saveConfigAs_();
 
         // Paths
         std::string shaderDir_;
@@ -73,6 +90,12 @@ namespace app {
         // Window state
         GLFWwindow* window_ = nullptr;
         int fbW_ = 0, fbH_ = 0;
+
+        // Simulation config (the central data model)
+        sim::core::SimConfig config_;
+        std::string configFilepath_;     // "" = unsaved new config
+        bool configDirty_ = false;       // has unsaved changes
+        bool gncEnabled_  = false;       // controls optional GNC fields
 
         // 3D Viewport
         vis::Framebuffer                    viewportFBO_;
